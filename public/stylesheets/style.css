@@ -1,0 +1,14 @@
+html,
+body {
+    padding: 0;
+    margin: 0;
+    background: #012;
+    color: #fff;
+    overflow: hidden;
+}
+
+canvas#drawSurface {}
+
+img#spriteSheet {
+    display: none;
+}
