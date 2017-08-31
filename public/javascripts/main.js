@@ -7,8 +7,6 @@ requirejs.config({
 
 requirejs(['jquery', 'map', 'tile'],
     function ($, HexMap, Tile) {
-        console.log(Tile);
-        let times = [0, 0, 0, 0, 0];
         let hexMap = new HexMap({
             mapWidthInTiles: 10,
             mapHeightInTiles: 10,
@@ -38,15 +36,15 @@ requirejs(['jquery', 'map', 'tile'],
             window.requestAnimationFrame(renderFrame);
         }
         // when sprite loading is done, load map and begin drawing
-        Tile.loadSprites(() => {
-            let iterator = hexMap.grid.getTileIterator();
-            let tile = iterator.next();
-            console.log(Tile.tileTypes.sandDesert);
-            while (tile !== null) {
-                tile.terrain = Tile.tileTypes.sandDesert;
-                tile = iterator.next();
-            }
-            hexMap.draw(mapCtx);
-            window.requestAnimationFrame(renderFrame);
-        });
+        Tile.loadSprites()
+            .then(() => {
+                let iterator = hexMap.grid.getTileIterator();
+                let tile = iterator.next();
+                while (tile !== null) {
+                    tile.terrain = Tile.tileTypes.sandDesert;
+                    tile = iterator.next();
+                }
+                hexMap.draw(mapCtx);
+                window.requestAnimationFrame(renderFrame);
+            });
     });

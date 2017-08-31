@@ -9,13 +9,16 @@ define(['jquery'],
                 sprite_name: 'large_sand_desert'
             }
         };
-        function loadSprites(callback) {
+        function loadSprites() {
+            var deferred = $.Deferred();
             $.getJSON('data/terrain.json', function (json) {
                 for (let t in tileTypes) {
                     tileTypes[t].sprite = json[tileTypes[t].sprite_name];
                 }
-                callback();
+                deferred.resolve();
+                console.log('loaded sprites');
             });
+            return deferred.promise();
         }
         return {
             loadSprites: loadSprites,
