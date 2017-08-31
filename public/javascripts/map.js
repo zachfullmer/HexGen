@@ -89,8 +89,8 @@ define(['hex'],
             if (_tileAdvanceVertical === undefined) {
                 _tileAdvanceVertical = Math.round(_tileHeightInPixels * 0.75);
             }
-            var _mapWidthInPixels = (lastPos.x + 1) * op.tileWidthInPixels;
-            var _mapHeightInPixels = (lastPos.y * op.tileHeightInPixels * 0.75) + op.tileHeightInPixels;
+            var _mapWidthInPixels = (op.mapWidthInTiles + 0.5) * op.tileWidthInPixels;
+            var _mapHeightInPixels = ((op.mapHeightInTiles - 1) * _tileAdvanceVertical) + op.tileHeightInPixels;
             console.log(lastPos.y);
             Object.defineProperties(this, {
                 mapWidthInTiles: {
