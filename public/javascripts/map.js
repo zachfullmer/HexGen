@@ -29,6 +29,10 @@ define(['hex'],
             var _mapHeightInTiles = op.mapHeightInTiles;
             var _tileWidthInPixels = op.tileWidthInPixels;
             var _tileHeightInPixels = op.tileHeightInPixels;
+            var _tileAdvanceVertical = op.tileAdvanceVertical;
+            if (_tileAdvanceVertical === undefined) {
+                _tileAdvanceVertical = Math.round(_tileHeightInPixels * 0.75);
+            }
             var _mapWidthInPixels = (lastPos.x + 1) * op.tileWidthInPixels;
             var _mapHeightInPixels = (lastPos.y * op.tileHeightInPixels * 0.75) + op.tileHeightInPixels;
             Object.defineProperties(this, {
@@ -43,6 +47,9 @@ define(['hex'],
                 },
                 tileHeightInPixels: {
                     get: function () { return _tileHeightInPixels; }
+                },
+                tileAdvanceVertical: {
+                    get: function () { return _tileAdvanceVertical; }
                 },
                 mapWidthInPixels: {
                     get: function () { return _mapWidthInPixels; }
@@ -62,12 +69,14 @@ define(['hex'],
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
                     pos.x * this.tileWidthInPixels,
-                    pos.y * this.tileHeightInPixels * 0.75,
+                    pos.y * this.tileAdvanceVertical,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels);
+                //console.log(Math.round(pos.y * this.tileHeightInPixels * 0.75));
                 tile = iterator.next();
             }
         }
+        console.log('created a new HexMap');
         return HexMap;
     }
 );
