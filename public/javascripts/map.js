@@ -1,6 +1,62 @@
 
 define(['hex'],
     function (HexGrid) {
+        // function pixel_to_hex(x, y):
+        //     q = (x * sqrt(3)/3 - y / 3) / size
+        //     r = y * 2/3 / size
+        //     return hex_round(Hex(q, r))
+        function cubeRound(cube) {
+            var rx = Math.round(cube.x)
+            var ry = Math.round(cube.y)
+            var rz = Math.round(cube.z)
+            var xDiff = Math.abs(rx - cube.x);
+            var yDiff = Math.abs(ry - cube.y);
+            var zDiff = Math.abs(rz - cube.z);
+            if (xDiff > yDiff && xDiff > zDiff) {
+                rx = -ry - rz;
+            }
+            else if (yDiff > zDiff) {
+                ry = -rx - rz;
+            }
+            else {
+                rz = -rx - ry;
+            }
+            return { x: rx, y: ry, z: rz };
+        }
+        function oddrToCube(x, y) {
+            var xCube = x - (y - (y & 1)) / 2;
+            var zCube = y;
+            var yCube = -x - z;
+        }
+        function axialToCube(axial) {
+            var x = axial.q;
+            var z = axial.r;
+            var y = -x - z;
+            return { x: x, y: y, z: z };
+        }
+        function cubeToAxial(cube) {
+            var q = cube.x;
+            var r = cube.z;
+            return { q: q, r: r };
+        }
+        function axialToOffset(axial) {
+            var x = axial.q + Math.floor(axial.r / 2);
+            var y = axial.r;
+            return { x: x, y: y };
+        }
+        function offsetToAxial(offset) {
+            var q = offset.x - Math.floor(offset.y / 2);
+            var r = offset.y;
+            return { q: q, r: r };
+        }
+        function pixelToAxial(x, y, size) {
+            let q = (x * Math.sqrt(3) / 3 - y / 3) / size;
+            let r = y * 0.667 / size;
+            let cube = axialToCube({ q: q, r: r });
+            cube = cubeRound(cube);
+            let result = cubeToAxial(cube);
+            return result;
+        }
         var TileFactory = function () {
             var _id = 0;
             return {
@@ -35,6 +91,7 @@ define(['hex'],
             }
             var _mapWidthInPixels = (lastPos.x + 1) * op.tileWidthInPixels;
             var _mapHeightInPixels = (lastPos.y * op.tileHeightInPixels * 0.75) + op.tileHeightInPixels;
+            console.log(lastPos.y);
             Object.defineProperties(this, {
                 mapWidthInTiles: {
                     get: function () { return _mapWidthInTiles; }
@@ -57,7 +114,7 @@ define(['hex'],
                 mapHeightInPixels: {
                     get: function () { return _mapHeightInPixels; }
                 }
-            })
+            });
         }
         HexMap.prototype.draw = function (ctx) {
             let iterator = this.grid.getTileIterator();
@@ -72,11 +129,15 @@ define(['hex'],
                     pos.y * this.tileAdvanceVertical,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels);
-                //console.log(Math.round(pos.y * this.tileHeightInPixels * 0.75));
                 tile = iterator.next();
             }
         }
         console.log('created a new HexMap');
-        return HexMap;
+        return {
+            axialToOffset: axialToOffset,
+            HexMap: HexMap,
+            offsetToAxial: offsetToAxial,
+            pixelToAxial: pixelToAxial
+        };
     }
 );

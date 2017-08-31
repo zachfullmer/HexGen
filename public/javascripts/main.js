@@ -6,12 +6,19 @@ requirejs.config({
 });
 
 requirejs(['jquery', 'map', 'tile'],
-    function ($, HexMap, Tile) {
-        let hexMap = new HexMap({
-            mapWidthInTiles: 10,
-            mapHeightInTiles: 10,
+    function ($, map, Tile) {
+        let hexMap = new map.HexMap({
+            mapWidthInTiles: 5,
+            mapHeightInTiles: 5,
             tileWidthInPixels: 64,
             tileHeightInPixels: 74
+        });
+        window.addEventListener('mousemove', (event) => {
+            let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
+            let offset = map.axialToOffset(axial);
+            //axial = map.offsetToAxial(offset);
+            $('#info').text(axial.q + ',' + axial.r);
+            //$('#info').text(offset.x + ',' + offset.y);
         });
         var c = $('#drawSurface')[0];
         var ctx = c.getContext('2d');
@@ -25,7 +32,7 @@ requirejs(['jquery', 'map', 'tile'],
             c.width = window.innerWidth;
             c.height = window.innerHeight;
             ctx.clearRect(0, 0, c.width, c.height);
-            ctx.drawImage(mapCanvas, 0, 0, mapCanvas.width, mapCanvas.height, 0, 0, mapCanvas.width, mapCanvas.height);
+            ctx.drawImage(mapCanvas, 0, 0, mapCanvas.width, mapCanvas.height, -hexMap.tileWidthInPixels / 2, -hexMap.tileHeightInPixels / 2, mapCanvas.width, mapCanvas.height);
             // end main drawing
             var t1 = performance.now();
             var time = Math.round(t1 - t0);
