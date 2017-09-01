@@ -116,12 +116,12 @@ define(['hex'],
                 }
             });
         }
+        var img = document.getElementById("spriteSheet");
         HexMap.prototype.draw = function (ctx) {
             let iterator = this.grid.getTileIterator();
             let tile = iterator.next();
             while (tile !== null) {
                 let pos = this.grid.getPositionById(tile.id);
-                var img = document.getElementById("spriteSheet");
                 ctx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
@@ -132,7 +132,18 @@ define(['hex'],
                 tile = iterator.next();
             }
         }
-        console.log('created a new HexMap');
+        HexMap.prototype.drawTile = function (ctx, x, y) {
+            let tile = this.grid.getTileByCoords(x, y);
+            let pos = this.grid.getPositionByCoords(x, y);
+            ctx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
+                this.tileWidthInPixels,
+                this.tileHeightInPixels,
+                pos.x * this.tileWidthInPixels,
+                pos.y * this.tileAdvanceVertical,
+                this.tileWidthInPixels,
+                this.tileHeightInPixels);
+        }
+        console.log('loaded HexMap class');
         return {
             axialToOffset: axialToOffset,
             HexMap: HexMap,

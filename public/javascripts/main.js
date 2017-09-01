@@ -8,17 +8,10 @@ requirejs.config({
 requirejs(['jquery', 'map', 'tile'],
     function ($, map, Tile) {
         let hexMap = new map.HexMap({
-            mapWidthInTiles: 5,
+            mapWidthInTiles: 8,
             mapHeightInTiles: 5,
             tileWidthInPixels: 64,
             tileHeightInPixels: 74
-        });
-        window.addEventListener('mousemove', (event) => {
-            let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
-            let offset = map.axialToOffset(axial);
-            //axial = map.offsetToAxial(offset);
-            $('#info').text(axial.q + ',' + axial.r);
-            //$('#info').text(offset.x + ',' + offset.y);
         });
         var c = $('#drawSurface')[0];
         var ctx = c.getContext('2d');
@@ -26,6 +19,18 @@ requirejs(['jquery', 'map', 'tile'],
         mapCanvas.width = hexMap.mapWidthInPixels;
         mapCanvas.height = hexMap.mapHeightInPixels;
         let mapCtx = mapCanvas.getContext('2d');
+        window.addEventListener('mousemove', (event) => {
+            let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
+            let offset = map.axialToOffset(axial);
+            //axial = map.offsetToAxial(offset);
+            $('#info').text(axial.q + ',' + axial.r);
+            if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
+                let tile = hexMap.grid.getTileByCoords(offset.x, offset.y);
+                tile.terrain = Tile.tileTypes.grass;
+                hexMap.drawTile(mapCtx, offset.x, offset.y);
+            }
+            //$('#info').text(offset.x + ',' + offset.y);
+        });
         function renderFrame() {
             var t0 = performance.now();
             // main drawing

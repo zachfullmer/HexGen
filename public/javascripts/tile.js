@@ -3,7 +3,7 @@ define(['jquery'],
     function ($) {
         var tileTypes = {
             grass: {
-                sprite_name: 'med_grass'
+                sprite_name: 'large_grass'
             },
             sandDesert: {
                 sprite_name: 'large_sand_desert'
