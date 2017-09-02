@@ -6,12 +6,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery', 'map', 'tile', 'xml', 'sprites'],
-    function ($, map, tile, xml, sprites) {
-        sprites.addAnimList('monsters.anim')
-            .then(() => {
-                console.log(sprites.animLists);
-            });
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
+    function ($, map, tile, xml, sprites, anim) {
         let hexMap = new map.HexMap({
             mapWidthInTiles: 10,
             mapHeightInTiles: 10,
@@ -35,7 +31,15 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites'],
                 hexMap.drawTile(mapCtx, offset.x, offset.y);
             }
         });
-        function renderFrame() {
+        var testAnim = null;
+        var oldTime = null;
+        function renderFrame(time) {
+            if (oldTime === null) {
+                oldTime = time;
+            }
+            var deltaTime = time - oldTime;
+            oldTime = time;
+            testAnim.update(deltaTime);
             var t0 = performance.now();
             // main drawing
             c.width = window.innerWidth;
@@ -46,6 +50,15 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites'],
                 -hexMap.tileHeightInPixels / 2,
                 mapCanvas.width / 1,
                 mapCanvas.height / 1);
+            //ctx.drawImage($('#monstersSpriteSheet')[0], 0, 0, 100, 100, 0, 0, 100, 100);
+            for (let a = 0; a < 1; a++) {
+                testAnim.draw();
+                ctx.drawImage(testAnim.animCanvas, 0, 0, testAnim.animCanvas.width, testAnim.animCanvas.height,
+                    40,
+                    70,
+                    testAnim.animCanvas.width / 1,
+                    testAnim.animCanvas.height / 1);
+            }
             // end main drawing
             var t1 = performance.now();
             var time = Math.round(t1 - t0);
@@ -56,8 +69,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites'],
             window.requestAnimationFrame(renderFrame);
         }
         // when sprite loading is done, load map and begin drawing
-        tile.loadTiles()
-            .then(() => {
+        $.when(tile.loadTiles(), sprites.addAnimList('x.anim'))
+            .done(() => {
+                testAnim = new anim.Anim(sprites.animLists.x['Animation']);
                 let iterator = hexMap.grid.getTileIterator();
                 let currentTile = iterator.next();
                 while (currentTile !== null) {

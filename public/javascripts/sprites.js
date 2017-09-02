@@ -25,10 +25,10 @@ define(['jquery', 'xml'],
                 }
                 else if (child.tagName == 'spr') {
                     folderData[1]['spr'][child.getAttribute('name')] = {
-                        x: child.getAttribute('x'),
-                        y: child.getAttribute('y'),
-                        w: child.getAttribute('w'),
-                        h: child.getAttribute('h')
+                        x: parseInt(child.getAttribute('x')),
+                        y: parseInt(child.getAttribute('y')),
+                        w: parseInt(child.getAttribute('w')),
+                        h: parseInt(child.getAttribute('h'))
                     };
                 }
                 child = xml.nextSibling(child);
@@ -101,21 +101,25 @@ define(['jquery', 'xml'],
                     var fileNameMinusExt = fileName.match(/(.+)\./)[1];
                     addSpriteList(fileName)
                         .then(() => {
+                            var spriteList = spriteLists[fileNameMinusExt];
                             var animListObject = {};
                             var anim = xml.getFirstChild(anims);
                             // loop through animations
                             while (anim !== null) {
                                 if (anim.tagName == 'anim') {
                                     var animObject = {
-                                        loops: anim.getAttribute('loops'),
+                                        name: anim.getAttribute('name'),
+                                        spriteList: spriteList,
+                                        loops: parseInt(anim.getAttribute('loops')),
                                         cells: []
                                     };
                                     // loop through animation cells
+                                    var extents = { x1: 0, y1: 0, x2: 0, y2: 0 };
                                     var cell = xml.getFirstChild(anim);
                                     while (cell !== null) {
                                         if (cell.tagName == 'cell') {
                                             var cellObject = {
-                                                delay: cell.getAttribute('delay'),
+                                                delay: parseInt(cell.getAttribute('delay')),
                                                 sprites: []
                                             };
                                             // loop through cell sprites
@@ -123,9 +127,9 @@ define(['jquery', 'xml'],
                                             while (spr !== null) {
                                                 if (spr.tagName == 'spr') {
                                                     var sprObject = {
-                                                        x: spr.getAttribute('x'),
-                                                        y: spr.getAttribute('y'),
-                                                        z: spr.getAttribute('z')
+                                                        x: parseInt(spr.getAttribute('x')),
+                                                        y: parseInt(spr.getAttribute('y')),
+                                                        z: parseInt(spr.getAttribute('z'))
                                                     }
                                                     let path = spr.getAttribute('name');
                                                     let splitPath = path.split(/\/+/);
@@ -142,6 +146,14 @@ define(['jquery', 'xml'],
                                                     if (sprObject.spriteData === undefined) {
                                                         throw Error('animation "' + xmlFileName + '" couldn\'t find sprite "' + path + '" in sprite list "' + fileName + '"');
                                                     }
+                                                    var left = Math.floor(sprObject.x - (sprObject.spriteData.w / 2));
+                                                    var right = Math.floor(sprObject.x + (sprObject.spriteData.w / 2));
+                                                    var up = Math.floor(sprObject.y - (sprObject.spriteData.h / 2));
+                                                    var down = Math.floor(sprObject.y + (sprObject.spriteData.h / 2));
+                                                    if (left < extents.x1) extents.x1 = left;
+                                                    if (right > extents.x2) extents.x2 = right;
+                                                    if (up < extents.y1) extents.y1 = up;
+                                                    if (down > extents.y2) extents.y2 = down;
                                                     cellObject.sprites.push(sprObject);
                                                 }
                                                 spr = xml.nextSibling(spr);
@@ -149,6 +161,28 @@ define(['jquery', 'xml'],
                                             animObject.cells.push(cellObject);
                                         }
                                         cell = xml.nextSibling(cell);
+                                    }
+                                    animObject.extents = extents;
+                                    var halfW = Math.floor((extents.x2 - extents.x1) / 2);
+                                    var halfH = Math.floor((extents.y2 - extents.y1) / 2);
+                                    var shiftX = false, shiftY = false;
+                                    for (let c in animObject.cells) {
+                                        for (let s in animObject.cells[c].sprites) {
+                                            let sprite = animObject.cells[c].sprites[s];
+                                            sprite.x -= Math.floor(sprite.spriteData.w / 2 - halfW);
+                                            sprite.y -= Math.floor(sprite.spriteData.h / 2 - halfH);
+                                            if (sprite.x < 0) shiftX = true;
+                                            if (sprite.y < 0) shiftY = true;
+                                        }
+                                    }
+                                    if (shiftX || shiftY) {
+                                        for (let c in animObject.cells) {
+                                            for (let s in animObject.cells[c].sprites) {
+                                                let sprite = animObject.cells[c].sprites[s];
+                                                if (shiftX) sprite.x++;
+                                                if (shiftY) sprite.y++;
+                                            }
+                                        }
                                     }
                                     animListObject[anim.getAttribute('name')] = animObject;
                                 }
