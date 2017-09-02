@@ -9,7 +9,7 @@ body {
 
 canvas#drawSurface {}
 
-img#spriteSheet {
+img.sprite-sheet {
     display: none;
 }
 
