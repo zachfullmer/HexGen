@@ -69,9 +69,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
             window.requestAnimationFrame(renderFrame);
         }
         // when sprite loading is done, load map and begin drawing
-        $.when(tile.loadTiles(), sprites.addAnimList('x.anim'))
+        $.when(tile.loadTiles(), sprites.addAnimList('monsters.anim'))
             .done(() => {
-                testAnim = new anim.Anim(sprites.animLists.x['Animation']);
+                testAnim = new anim.Anim(sprites.animLists.monsters['Demon']);
                 let iterator = hexMap.grid.getTileIterator();
                 let currentTile = iterator.next();
                 while (currentTile !== null) {
