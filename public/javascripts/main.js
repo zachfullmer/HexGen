@@ -1,18 +1,24 @@
 requirejs.config({
     paths: {
         jquery: 'utility/jquery-1.10.2.min',
-        hex: 'utility/hex-grid'
+        hex: 'utility/hex-grid',
+        xml: 'utility/xml-parsing'
     }
 });
 
-requirejs(['jquery', 'map', 'tile'],
-    function ($, map, Tile) {
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites'],
+    function ($, map, tile, xml, sprites) {
+        sprites.addAnimList('monsters.anim')
+            .then(() => {
+                console.log(sprites.animLists);
+            });
         let hexMap = new map.HexMap({
-            mapWidthInTiles: 8,
-            mapHeightInTiles: 5,
+            mapWidthInTiles: 10,
+            mapHeightInTiles: 10,
             tileWidthInPixels: 64,
             tileHeightInPixels: 74
         });
+        console.log('map ready');
         var c = $('#drawSurface')[0];
         var ctx = c.getContext('2d');
         let mapCanvas = document.createElement('canvas');
@@ -22,14 +28,12 @@ requirejs(['jquery', 'map', 'tile'],
         window.addEventListener('mousemove', (event) => {
             let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
             let offset = map.axialToOffset(axial);
-            //axial = map.offsetToAxial(offset);
             $('#info').text(axial.q + ',' + axial.r);
             if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
-                let tile = hexMap.grid.getTileByCoords(offset.x, offset.y);
-                tile.terrain = Tile.tileTypes.grass;
+                let changedTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
+                changedTile.terrain = tile.tileTypes.tundra;
                 hexMap.drawTile(mapCtx, offset.x, offset.y);
             }
-            //$('#info').text(offset.x + ',' + offset.y);
         });
         function renderFrame() {
             var t0 = performance.now();
@@ -37,7 +41,11 @@ requirejs(['jquery', 'map', 'tile'],
             c.width = window.innerWidth;
             c.height = window.innerHeight;
             ctx.clearRect(0, 0, c.width, c.height);
-            ctx.drawImage(mapCanvas, 0, 0, mapCanvas.width, mapCanvas.height, -hexMap.tileWidthInPixels / 2, -hexMap.tileHeightInPixels / 2, mapCanvas.width, mapCanvas.height);
+            ctx.drawImage(mapCanvas, 0, 0, mapCanvas.width, mapCanvas.height,
+                -hexMap.tileWidthInPixels / 2,
+                -hexMap.tileHeightInPixels / 2,
+                mapCanvas.width / 1,
+                mapCanvas.height / 1);
             // end main drawing
             var t1 = performance.now();
             var time = Math.round(t1 - t0);
@@ -48,14 +56,15 @@ requirejs(['jquery', 'map', 'tile'],
             window.requestAnimationFrame(renderFrame);
         }
         // when sprite loading is done, load map and begin drawing
-        Tile.loadSprites()
+        tile.loadTiles()
             .then(() => {
                 let iterator = hexMap.grid.getTileIterator();
-                let tile = iterator.next();
-                while (tile !== null) {
-                    tile.terrain = Tile.tileTypes.sandDesert;
-                    tile = iterator.next();
+                let currentTile = iterator.next();
+                while (currentTile !== null) {
+                    currentTile.terrain = tile.tileTypes.desert;
+                    currentTile = iterator.next();
                 }
+                console.log('start map drawing');
                 hexMap.draw(mapCtx);
                 window.requestAnimationFrame(renderFrame);
             });

@@ -91,7 +91,6 @@ define(['hex'],
             }
             var _mapWidthInPixels = (op.mapWidthInTiles + 0.5) * op.tileWidthInPixels;
             var _mapHeightInPixels = ((op.mapHeightInTiles - 1) * _tileAdvanceVertical) + op.tileHeightInPixels;
-            console.log(lastPos.y);
             Object.defineProperties(this, {
                 mapWidthInTiles: {
                     get: function () { return _mapWidthInTiles; }
@@ -116,7 +115,8 @@ define(['hex'],
                 }
             });
         }
-        var img = document.getElementById("spriteSheet");
+        var img = document.getElementsByClassName('sprite-sheet')[0];
+        // (re)draw the whole map, tile-by-tile
         HexMap.prototype.draw = function (ctx) {
             let iterator = this.grid.getTileIterator();
             let tile = iterator.next();
@@ -132,6 +132,7 @@ define(['hex'],
                 tile = iterator.next();
             }
         }
+        // (re)draw a single tile, on the given context and at the given coordinates
         HexMap.prototype.drawTile = function (ctx, x, y) {
             let tile = this.grid.getTileByCoords(x, y);
             let pos = this.grid.getPositionByCoords(x, y);
