@@ -19,9 +19,10 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
         var ctx = canvas.getContext('2d');
         var cam = new map.Camera();
         var camVel = { x: 0, y: 0 };
-        var camSpeed = 2;
+        var camSpeed = 5;
         window.addEventListener('mousemove', (event) => {
-            let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
+            let pixelPos = { x: event.clientX + cam.pos.x, y: event.clientY + cam.pos.y }
+            let axial = map.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
             let offset = map.axialToOffset(axial);
             $('#mousePos').text('mouse: ' + axial.q + ',' + axial.r);
             if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
@@ -79,7 +80,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
             for (let a = 0; a < 1; a++) {
                 let pos = hexMap.pixelCoordsOfTile(2, 4);
                 testAnim.renderFrame();
-                testAnim.draw(ctx, pos.x, pos.y);
+                testAnim.draw(ctx, cam, pos.x, pos.y);
             }
             // end main drawing
             var t1 = performance.now();

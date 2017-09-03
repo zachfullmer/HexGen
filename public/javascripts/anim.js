@@ -35,10 +35,10 @@ define(['jquery', 'sprites'],
                     animCtx.setTransform(1, 0, 0, 1, 0, 0);
                 }
             };
-            this.draw = function (ctx, x, y) {
+            this.draw = function (ctx, cam, x, y) {
                 ctx.drawImage(animCanvas, 0, 0, animCanvas.width, animCanvas.height,
-                    x + aData.offset.x,
-                    y + aData.offset.y,
+                    x + aData.offset.x - cam.pos.x,
+                    y + aData.offset.y - cam.pos.y,
                     animCanvas.width,
                     animCanvas.height);
             };
