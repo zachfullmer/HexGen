@@ -33,7 +33,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
         });
         var testAnim = null;
         var oldTime = null;
-        function renderFrame(time) {
+        function renderAll(time) {
             if (oldTime === null) {
                 oldTime = time;
             }
@@ -51,12 +51,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                 mapCanvas.width / 1,
                 mapCanvas.height / 1);
             for (let a = 0; a < 1; a++) {
-                testAnim.draw();
-                ctx.drawImage(testAnim.animCanvas, 0, 0, testAnim.animCanvas.width, testAnim.animCanvas.height,
-                    40,
-                    70,
-                    testAnim.animCanvas.width / 1,
-                    testAnim.animCanvas.height / 1);
+                testAnim.renderFrame();
+                testAnim.draw(ctx, 64, 0);
             }
             // end main drawing
             var t1 = performance.now();
@@ -65,7 +61,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
             ctx.strokeStyle = 'white';
             ctx.fillText(time, 10, 50);
             ctx.strokeText(time, 10, 50);
-            window.requestAnimationFrame(renderFrame);
+            window.requestAnimationFrame(renderAll);
         }
         // when sprite loading is done, load map and begin drawing
         $.when(tile.loadTiles(), sprites.addAnimList('castle.anim'))
@@ -79,6 +75,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                 }
                 console.log('start map drawing');
                 hexMap.draw(mapCtx);
-                window.requestAnimationFrame(renderFrame);
+                window.requestAnimationFrame(renderAll);
             });
     });

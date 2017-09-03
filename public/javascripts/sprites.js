@@ -179,7 +179,9 @@ define(['jquery', 'xml'],
                                             if (sprite.y < shiftY) shiftY = sprite.y;
                                         }
                                     }
+                                    animObject.offset = { x: -halfW, y: -halfH };
                                     if (shiftX < 0 || shiftY < 0) {
+                                        animObject.offset.x += shiftX, animObject.offset.y += shiftY;
                                         for (let c in animObject.cells) {
                                             for (let s in animObject.cells[c].sprites) {
                                                 let sprite = animObject.cells[c].sprites[s];
