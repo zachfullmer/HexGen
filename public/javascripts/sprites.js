@@ -187,12 +187,17 @@ define(['jquery', 'xml'],
                                                 let sprite = animObject.cells[c].sprites[s];
                                                 sprite.x -= shiftX;
                                                 sprite.y -= shiftY;
-                                                if (sprite.flipH) {
-                                                    sprite.x = -sprite.spriteData.w - sprite.x;
-                                                }
-                                                if (sprite.flipV) {
-                                                    sprite.y = -sprite.spriteData.h - sprite.y;
-                                                }
+                                            }
+                                        }
+                                    }
+                                    for (let c in animObject.cells) {
+                                        for (let s in animObject.cells[c].sprites) {
+                                            let sprite = animObject.cells[c].sprites[s];
+                                            if (sprite.flipH) {
+                                                sprite.x = -(sprite.x + sprite.spriteData.w);
+                                            }
+                                            if (sprite.flipV) {
+                                                sprite.y = -(sprite.y + sprite.spriteData.h);
                                             }
                                         }
                                     }

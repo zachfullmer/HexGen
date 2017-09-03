@@ -26,11 +26,12 @@ define(['jquery', 'sprites'],
             this.renderFrame = function () {
                 animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
                 for (let s in currentCell.sprites) {
-                    if (currentCell.sprites[s].flipH || currentCell.sprites[s].flipV) {
-                        animCtx.scale(currentCell.sprites[s].flipH ? -1 : 1, currentCell.sprites[s].flipV ? -1 : 1);
+                    var sprite = currentCell.sprites[s];
+                    var sd = sprite.spriteData;
+                    if (sprite.flipH || sprite.flipV) {
+                        animCtx.scale(sprite.flipH ? -1 : 1, sprite.flipV ? -1 : 1);
                     }
-                    var sd = currentCell.sprites[s].spriteData;
-                    animCtx.drawImage(img, sd.x, sd.y, sd.w, sd.h, currentCell.sprites[s].x, currentCell.sprites[s].y, sd.w, sd.h);
+                    animCtx.drawImage(img, sd.x, sd.y, sd.w, sd.h, sprite.x, sprite.y, sd.w, sd.h);
                     animCtx.setTransform(1, 0, 0, 1, 0, 0);
                 }
             };
