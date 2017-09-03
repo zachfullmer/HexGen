@@ -13,11 +13,13 @@ img.sprite-sheet {
     display: none;
 }
 
-p#info {
+div#infoBox {
     position: fixed;
     background: #000;
     color: #fff;
     top: 0;
     right: 0;
-    padding: 50px;
+    padding: 10px;
+    width: 100px;
+    height: 80px;
 }

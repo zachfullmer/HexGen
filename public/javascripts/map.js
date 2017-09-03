@@ -70,6 +70,9 @@ define(['hex'],
                 }
             };
         };
+        var Camera = function () {
+            this.pos = { x: 0, y: 0 };
+        }
         var tileFactory = new TileFactory();
         var HexMap = function (op) {
             this.grid = new HexGrid({
@@ -114,15 +117,23 @@ define(['hex'],
                     get: function () { return _mapHeightInPixels; }
                 }
             });
+            this.mapCanvas = document.createElement('canvas');
+            this.mapCanvas.width = this.mapWidthInPixels;
+            this.mapCanvas.height = this.mapHeightInPixels;
+            this.mapCtx = this.mapCanvas.getContext('2d');
+            this.origin = {
+                x: Math.floor(-this.tileWidthInPixels / 2),
+                y: Math.floor(-this.tileHeightInPixels / 2)
+            }
         }
         var img = document.getElementsByClassName('sprite-sheet')[0];
         // (re)draw the whole map, tile-by-tile
-        HexMap.prototype.draw = function (ctx) {
+        HexMap.prototype.render = function () {
             let iterator = this.grid.getTileIterator();
             let tile = iterator.next();
             while (tile !== null) {
                 let pos = this.grid.getPositionById(tile.id);
-                ctx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
+                this.mapCtx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
                     pos.x * this.tileWidthInPixels,
@@ -133,16 +144,28 @@ define(['hex'],
             }
         }
         // (re)draw a single tile, on the given context and at the given coordinates
-        HexMap.prototype.drawTile = function (ctx, x, y) {
+        HexMap.prototype.renderTile = function (x, y) {
             let tile = this.grid.getTileByCoords(x, y);
             let pos = this.grid.getPositionByCoords(x, y);
-            ctx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
+            this.mapCtx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
                 this.tileWidthInPixels,
                 this.tileHeightInPixels,
                 pos.x * this.tileWidthInPixels,
                 pos.y * this.tileAdvanceVertical,
                 this.tileWidthInPixels,
                 this.tileHeightInPixels);
+        }
+        // draw the rendered map to an external canvas
+        HexMap.prototype.draw = function (ctx, canvas, cam) {
+            ctx.drawImage(this.mapCanvas,
+                -this.origin.x + cam.pos.x,
+                -this.origin.y + cam.pos.y,
+                canvas.width,
+                canvas.height,
+                0,
+                0,
+                canvas.width / 1,
+                canvas.height / 1);
         }
         HexMap.prototype.pixelCoordsOfTile = function (offsetX, offsetY) {
             var pos = this.grid.getPositionByCoords(offsetX, offsetY);
@@ -153,6 +176,7 @@ define(['hex'],
         console.log('loaded HexMap class');
         return {
             axialToOffset: axialToOffset,
+            Camera: Camera,
             HexMap: HexMap,
             offsetToAxial: offsetToAxial,
             pixelToAxial: pixelToAxial

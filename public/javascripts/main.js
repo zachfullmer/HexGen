@@ -9,26 +9,54 @@ requirejs.config({
 requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
     function ($, map, tile, xml, sprites, anim) {
         let hexMap = new map.HexMap({
-            mapWidthInTiles: 10,
-            mapHeightInTiles: 10,
+            mapWidthInTiles: 50,
+            mapHeightInTiles: 50,
             tileWidthInPixels: 64,
             tileHeightInPixels: 74
         });
         console.log('map ready');
-        var c = $('#drawSurface')[0];
-        var ctx = c.getContext('2d');
-        let mapCanvas = document.createElement('canvas');
-        mapCanvas.width = hexMap.mapWidthInPixels;
-        mapCanvas.height = hexMap.mapHeightInPixels;
-        let mapCtx = mapCanvas.getContext('2d');
+        var canvas = $('#drawSurface')[0];
+        var ctx = canvas.getContext('2d');
+        var cam = new map.Camera();
+        var camVel = { x: 0, y: 0 };
+        var camSpeed = 2;
         window.addEventListener('mousemove', (event) => {
             let axial = map.pixelToAxial(event.clientX, event.clientY, hexMap.tileHeightInPixels / 2);
             let offset = map.axialToOffset(axial);
-            $('#info').text(axial.q + ',' + axial.r);
+            $('#mousePos').text('mouse: ' + axial.q + ',' + axial.r);
             if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
                 let changedTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
                 changedTile.terrain = tile.tileTypes.tundra;
-                hexMap.drawTile(mapCtx, offset.x, offset.y);
+                hexMap.renderTile(offset.x, offset.y);
+            }
+        });
+        $(window).keydown((event) => {
+            if (event.repeat) {
+                return;
+            }
+            if (event.key == 'ArrowLeft' || event.key == 'a') {
+                camVel.x = -camSpeed;
+            }
+            if (event.key == 'ArrowRight' || event.key == 'd') {
+                camVel.x = camSpeed;
+            }
+            if (event.key == 'ArrowUp' || event.key == 'w') {
+                camVel.y = -camSpeed;
+            }
+            if (event.key == 'ArrowDown' || event.key == 's') {
+                camVel.y = camSpeed;
+            }
+            if (event.key == 'Enter') {
+                cam.pos.x = 0;
+                cam.pos.y = 0;
+            }
+        });
+        $(window).keyup((event) => {
+            if (event.key == 'ArrowLeft' || event.key == 'a' || event.key == 'ArrowRight' || event.key == 'd') {
+                camVel.x = 0;
+            }
+            if (event.key == 'ArrowUp' || event.key == 'w' || event.key == 'ArrowDown' || event.key == 's') {
+                camVel.y = 0;
             }
         });
         var testAnim = null;
@@ -40,16 +68,14 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
             var deltaTime = time - oldTime;
             oldTime = time;
             testAnim.update(deltaTime);
+            cam.pos.x += camVel.x, cam.pos.y += camVel.y;
+            $('#camPos').text('camera: ' + cam.pos.x + ',' + cam.pos.y);
             var t0 = performance.now();
             // main drawing
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-            ctx.clearRect(0, 0, c.width, c.height);
-            ctx.drawImage(mapCanvas, 0, 0, mapCanvas.width, mapCanvas.height,
-                -hexMap.tileWidthInPixels / 2,
-                -hexMap.tileHeightInPixels / 2,
-                mapCanvas.width / 1,
-                mapCanvas.height / 1);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hexMap.draw(ctx, canvas, cam);
             for (let a = 0; a < 1; a++) {
                 let pos = hexMap.pixelCoordsOfTile(2, 4);
                 testAnim.renderFrame();
@@ -75,7 +101,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                     currentTile = iterator.next();
                 }
                 console.log('start map drawing');
-                hexMap.draw(mapCtx);
+                hexMap.render();
                 window.requestAnimationFrame(renderAll);
             });
     });
