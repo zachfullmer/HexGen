@@ -50,7 +50,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                 -hexMap.tileHeightInPixels / 2,
                 mapCanvas.width / 1,
                 mapCanvas.height / 1);
-            //ctx.drawImage($('#monstersSpriteSheet')[0], 0, 0, 100, 100, 0, 0, 100, 100);
             for (let a = 0; a < 1; a++) {
                 testAnim.draw();
                 ctx.drawImage(testAnim.animCanvas, 0, 0, testAnim.animCanvas.width, testAnim.animCanvas.height,
@@ -69,9 +68,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
             window.requestAnimationFrame(renderFrame);
         }
         // when sprite loading is done, load map and begin drawing
-        $.when(tile.loadTiles(), sprites.addAnimList('monsters.anim'))
+        $.when(tile.loadTiles(), sprites.addAnimList('castle.anim'))
             .done(() => {
-                testAnim = new anim.Anim(sprites.animLists.monsters['Demon']);
+                testAnim = new anim.Anim(sprites.animLists.castle['castle']);
                 let iterator = hexMap.grid.getTileIterator();
                 let currentTile = iterator.next();
                 while (currentTile !== null) {

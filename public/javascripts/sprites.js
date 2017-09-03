@@ -119,7 +119,7 @@ define(['jquery', 'xml'],
                                     while (cell !== null) {
                                         if (cell.tagName == 'cell') {
                                             var cellObject = {
-                                                delay: parseInt(cell.getAttribute('delay')),
+                                                delay: parseInt(cell.getAttribute('delay')) * 30.9,
                                                 sprites: []
                                             };
                                             // loop through cell sprites
@@ -129,7 +129,9 @@ define(['jquery', 'xml'],
                                                     var sprObject = {
                                                         x: parseInt(spr.getAttribute('x')),
                                                         y: parseInt(spr.getAttribute('y')),
-                                                        z: parseInt(spr.getAttribute('z'))
+                                                        z: parseInt(spr.getAttribute('z')),
+                                                        flipH: spr.getAttribute('flipH') === null ? false : true,
+                                                        flipV: spr.getAttribute('flipV') === null ? false : true
                                                     }
                                                     let path = spr.getAttribute('name');
                                                     let splitPath = path.split(/\/+/);
@@ -163,24 +165,29 @@ define(['jquery', 'xml'],
                                         cell = xml.nextSibling(cell);
                                     }
                                     animObject.extents = extents;
-                                    var halfW = Math.floor((extents.x2 - extents.x1) / 2);
-                                    var halfH = Math.floor((extents.y2 - extents.y1) / 2);
-                                    var shiftX = false, shiftY = false;
+                                    var width = extents.x2 - extents.x1;
+                                    var height = extents.y2 - extents.y1;
+                                    var halfW = Math.floor(width / 2);
+                                    var halfH = Math.floor(height / 2);
+                                    var shiftX = 0, shiftY = 0;
                                     for (let c in animObject.cells) {
                                         for (let s in animObject.cells[c].sprites) {
                                             let sprite = animObject.cells[c].sprites[s];
                                             sprite.x -= Math.floor(sprite.spriteData.w / 2 - halfW);
                                             sprite.y -= Math.floor(sprite.spriteData.h / 2 - halfH);
-                                            if (sprite.x < 0) shiftX = true;
-                                            if (sprite.y < 0) shiftY = true;
+                                            if (sprite.x < shiftX) shiftX = sprite.x;
+                                            if (sprite.y < shiftY) shiftY = sprite.y;
                                         }
                                     }
-                                    if (shiftX || shiftY) {
+                                    if (shiftX < 0 || shiftY < 0) {
                                         for (let c in animObject.cells) {
                                             for (let s in animObject.cells[c].sprites) {
                                                 let sprite = animObject.cells[c].sprites[s];
-                                                if (shiftX) sprite.x++;
-                                                if (shiftY) sprite.y++;
+                                                sprite.x -= shiftX;
+                                                sprite.y -= shiftY;
+                                                if (sprite.flipH) {
+                                                    sprite.x = -sprite.spriteData.w - sprite.x;
+                                                }
                                             }
                                         }
                                     }
