@@ -144,6 +144,12 @@ define(['hex'],
                 this.tileWidthInPixels,
                 this.tileHeightInPixels);
         }
+        HexMap.prototype.pixelCoordsOfTile = function (offsetX, offsetY) {
+            var pos = this.grid.getPositionByCoords(offsetX, offsetY);
+            pos.x *= this.tileWidthInPixels;
+            pos.y *= this.tileAdvanceVertical;
+            return pos;
+        }
         console.log('loaded HexMap class');
         return {
             axialToOffset: axialToOffset,

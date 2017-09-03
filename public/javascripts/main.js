@@ -51,8 +51,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                 mapCanvas.width / 1,
                 mapCanvas.height / 1);
             for (let a = 0; a < 1; a++) {
+                let pos = hexMap.pixelCoordsOfTile(2, 4);
                 testAnim.renderFrame();
-                testAnim.draw(ctx, 64, 0);
+                testAnim.draw(ctx, pos.x, pos.y);
             }
             // end main drawing
             var t1 = performance.now();
