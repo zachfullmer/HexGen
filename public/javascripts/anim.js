@@ -26,8 +26,8 @@ define(['jquery', 'sprites'],
             this.draw = function () {
                 animCtx.clearRect(0, 0, this.animCanvas.width, this.animCanvas.height);
                 for (let s in currentCell.sprites) {
-                    if (currentCell.sprites[s].flipH) {
-                        animCtx.scale(-1, 1);
+                    if (currentCell.sprites[s].flipH || currentCell.sprites[s].flipV) {
+                        animCtx.scale(currentCell.sprites[s].flipH ? -1 : 1, currentCell.sprites[s].flipV ? -1 : 1);
                     }
                     var sd = currentCell.sprites[s].spriteData;
                     animCtx.drawImage(this.img, sd.x, sd.y, sd.w, sd.h, currentCell.sprites[s].x, currentCell.sprites[s].y, sd.w, sd.h);

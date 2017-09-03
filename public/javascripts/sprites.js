@@ -188,6 +188,9 @@ define(['jquery', 'xml'],
                                                 if (sprite.flipH) {
                                                     sprite.x = -sprite.spriteData.w - sprite.x;
                                                 }
+                                                if (sprite.flipV) {
+                                                    sprite.y = -sprite.spriteData.h - sprite.y;
+                                                }
                                             }
                                         }
                                     }
