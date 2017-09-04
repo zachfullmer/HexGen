@@ -50,7 +50,9 @@ define(['hex', 'tile', 'sprites'],
             return {
                 newTile: function () {
                     var tile = {
-                        id: _id.toString()
+                        id: _id.toString(),
+                        terrain: null,
+                        featureOpacity: 1.0
                     };
 
                     _id += 1;
@@ -184,9 +186,11 @@ define(['hex', 'tile', 'sprites'],
                             w: featureSprite.sprite.w,
                             h: featureSprite.sprite.h
                         };
+                        ctx.globalAlpha = tile.featureOpacity;
                         ctx.drawImage(featureSpriteSheet,
                             featureSprite.sprite.x, featureSprite.sprite.y, featureSprite.sprite.w, featureSprite.sprite.h,
                             drawRect.x, drawRect.y, drawRect.w, drawRect.h);
+                        ctx.globalAlpha = 1.0;
                     }
                 }
             }
