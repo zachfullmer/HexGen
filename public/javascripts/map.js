@@ -1,10 +1,6 @@
 
-define(['hex'],
-    function (HexGrid) {
-        // function pixel_to_hex(x, y):
-        //     q = (x * sqrt(3)/3 - y / 3) / size
-        //     r = y * 2/3 / size
-        //     return hex_round(Hex(q, r))
+define(['hex', 'tile', 'sprites'],
+    function (HexGrid, tile, sprites) {
         function cubeRound(cube) {
             var rx = Math.round(cube.x)
             var ry = Math.round(cube.y)
@@ -49,14 +45,6 @@ define(['hex'],
             var r = offset.y;
             return { q: q, r: r };
         }
-        function pixelToAxial(x, y, size) {
-            let q = (x * Math.sqrt(3) / 3 - y / 3) / size;
-            let r = y * 0.667 / size;
-            let cube = axialToCube({ q: q, r: r });
-            cube = cubeRound(cube);
-            let result = cubeToAxial(cube);
-            return result;
-        }
         var TileFactory = function () {
             var _id = 0;
             return {
@@ -72,6 +60,17 @@ define(['hex'],
         };
         var Camera = function () {
             this.pos = { x: 0, y: 0 };
+            this.end = { x: 0, y: 0 };
+            this.minVisibleHex = { x: 0, y: 0 };
+            this.maxVisibleHex = { x: 0, y: 0 };
+            this.update = function (map, canvas) {
+                this.end.x = this.pos.x + canvas.width;
+                this.end.y = this.pos.y + canvas.height;
+                this.minVisibleHex.x = Math.max(0, Math.floor(this.pos.x / map.tileWidthInPixels) - 1);
+                this.minVisibleHex.y = Math.max(0, Math.floor(this.pos.y / map.tileAdvanceVertical) - 1);
+                this.maxVisibleHex.x = Math.min(map.mapWidthInTiles - 1, Math.ceil(this.end.x / map.tileWidthInPixels));
+                this.maxVisibleHex.y = Math.min(map.mapWidthInTiles - 1, Math.ceil(this.end.y / map.tileAdvanceVertical));
+            }
         }
         var tileFactory = new TileFactory();
         var HexMap = function (op) {
@@ -84,6 +83,8 @@ define(['hex'],
             });
             let lastTileId = op.mapWidthInTiles * op.mapHeightInTiles - 1;
             let lastPos = this.grid.getPositionById(lastTileId);
+            this.tileSpriteSheet = op.tileSpriteSheet;
+            this.featureSpriteSheet = op.featureSpriteSheet;
             var _mapWidthInTiles = op.mapWidthInTiles;
             var _mapHeightInTiles = op.mapHeightInTiles;
             var _tileWidthInPixels = op.tileWidthInPixels;
@@ -117,23 +118,22 @@ define(['hex'],
                     get: function () { return _mapHeightInPixels; }
                 }
             });
-            this.mapCanvas = document.createElement('canvas');
-            this.mapCanvas.width = this.mapWidthInPixels;
-            this.mapCanvas.height = this.mapHeightInPixels;
-            this.mapCtx = this.mapCanvas.getContext('2d');
+            this.tileCanvas = document.createElement('canvas');
+            this.tileCanvas.width = this.mapWidthInPixels;
+            this.tileCanvas.height = this.mapHeightInPixels;
+            this.tileCtx = this.tileCanvas.getContext('2d');
             this.origin = {
                 x: Math.floor(-this.tileWidthInPixels / 2),
                 y: Math.floor(-this.tileHeightInPixels / 2)
             }
         }
-        var img = document.getElementsByClassName('sprite-sheet')[0];
         // (re)draw the whole map, tile-by-tile
         HexMap.prototype.render = function () {
             let iterator = this.grid.getTileIterator();
             let tile = iterator.next();
             while (tile !== null) {
                 let pos = this.grid.getPositionById(tile.id);
-                this.mapCtx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
+                this.tileCtx.drawImage(this.tileSpriteSheet, tile.terrain.sprite.x, tile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
                     pos.x * this.tileWidthInPixels,
@@ -147,7 +147,7 @@ define(['hex'],
         HexMap.prototype.renderTile = function (x, y) {
             let tile = this.grid.getTileByCoords(x, y);
             let pos = this.grid.getPositionByCoords(x, y);
-            this.mapCtx.drawImage(img, tile.terrain.sprite.x, tile.terrain.sprite.y,
+            this.tileCtx.drawImage(this.tileSpriteSheet, tile.terrain.sprite.x, tile.terrain.sprite.y,
                 this.tileWidthInPixels,
                 this.tileHeightInPixels,
                 pos.x * this.tileWidthInPixels,
@@ -157,15 +157,35 @@ define(['hex'],
         }
         // draw the rendered map to an external canvas
         HexMap.prototype.draw = function (ctx, canvas, cam) {
-            ctx.drawImage(this.mapCanvas,
+            ctx.drawImage(this.tileCanvas,
                 -this.origin.x + cam.pos.x,
                 -this.origin.y + cam.pos.y,
                 canvas.width,
                 canvas.height,
                 0,
                 0,
-                canvas.width / 1,
-                canvas.height / 1);
+                canvas.width,
+                canvas.height);
+            for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
+                for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
+                    let tile = this.grid.getTileByCoords(x, y);
+                    if (tile.terrain.feature !== undefined) {
+                        let featureSprite = tile.terrain.feature.full;
+                        let halfW = Math.floor(featureSprite.sprite.w / 2);
+                        let halfH = Math.floor(featureSprite.sprite.h / 2);
+                        let tilePos = this.pixelCoordsOfTile(x, y);
+                        let drawRect = {
+                            x: tilePos.x - halfW + featureSprite.offsetX - cam.pos.x,
+                            y: tilePos.y - halfH + featureSprite.offsetY - cam.pos.y,
+                            w: featureSprite.sprite.w,
+                            h: featureSprite.sprite.h
+                        };
+                        ctx.drawImage(featureSpriteSheet,
+                            featureSprite.sprite.x, featureSprite.sprite.y, featureSprite.sprite.w, featureSprite.sprite.h,
+                            drawRect.x, drawRect.y, drawRect.w, drawRect.h);
+                    }
+                }
+            }
         }
         HexMap.prototype.pixelCoordsOfTile = function (offsetX, offsetY) {
             var pos = this.grid.getPositionByCoords(offsetX, offsetY);
@@ -173,13 +193,20 @@ define(['hex'],
             pos.y *= this.tileAdvanceVertical;
             return pos;
         }
+        HexMap.prototype.pixelToAxial = function (x, y, size) {
+            let q = x / this.tileWidthInPixels - y / this.tileAdvanceVertical * 0.5;
+            let r = y / this.tileAdvanceVertical;
+            let cube = axialToCube({ q: q, r: r });
+            cube = cubeRound(cube);
+            let result = cubeToAxial(cube);
+            return result;
+        }
         console.log('loaded HexMap class');
         return {
             axialToOffset: axialToOffset,
             Camera: Camera,
             HexMap: HexMap,
-            offsetToAxial: offsetToAxial,
-            pixelToAxial: pixelToAxial
+            offsetToAxial: offsetToAxial
         };
     }
 );

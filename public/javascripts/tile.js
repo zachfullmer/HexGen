@@ -1,64 +1,130 @@
 
 define(['jquery', 'sprites'],
     function ($, sprites) {
+        var featureTypes = {
+            mountain: {
+                name: 'Mountain',
+                full:
+                { spriteName: '/mountains/full/1', offsetX: 1, offsetY: -14 },
+                half:
+                { spriteName: '/mountains/half/1', offsetX: 1, offsetY: -6 },
+                quarter:
+                { spriteName: '/mountains/quarter/1', offsetX: 1, offsetY: -2 }
+            },
+            forestS: {
+                name: 'Forest S',
+                full: { spriteName: '/plants/forest/s1', offsetX: -5, offsetY: -4 }
+            },
+            forestM: {
+                name: 'Forest M',
+                full: { spriteName: '/plants/forest/m1', offsetX: -3, offsetY: -17 }
+            },
+            forestL: {
+                name: 'Forest L',
+                full: { spriteName: '/plants/forest/l1', offsetX: -3, offsetY: -20 }
+            },
+            taigaS: {
+                name: 'Taiga S',
+                full: { spriteName: '/plants/pine/s1', offsetX: -8, offsetY: -15 }
+            },
+            taigaM: {
+                name: 'Taiga M',
+                full: { spriteName: '/plants/pine/m1', offsetX: -6, offsetY: -18 }
+            },
+            taigaL: {
+                name: 'Taiga L',
+                full: { spriteName: '/plants/pine/l1', offsetX: 1, offsetY: -16 }//-5,-28
+            },
+            taigaSnowS: {
+                name: 'Taiga S',
+                full: { spriteName: '/plants/pineSnow/s1', offsetX: -8, offsetY: -15 }
+            },
+            taigaSnowM: {
+                name: 'Taiga M',
+                full: { spriteName: '/plants/pineSnow/m1', offsetX: -6, offsetY: -18 }
+            },
+            taigaSnowL: {
+                name: 'Taiga L',
+                full: { spriteName: '/plants/pineSnow/l1', offsetX: -5, offsetY: -28 }
+            }
+        }
         var tileTypes = {
             blank: {
+                spriteName: '/tiles/full/blank'
             },
             ocean: {
+                spriteName: '/tiles/full/ocean'
             },
             tundraSnow: {
+                spriteName: '/tiles/full/tundraSnow'
             },
             tundra: {
+                spriteName: '/tiles/full/tundra'
             },
             grassland: {
+                spriteName: '/tiles/full/grassland'
             },
             semiarid: {
+                spriteName: '/tiles/full/semiarid'
             },
             desert: {
+                spriteName: '/tiles/full/desert'
             },
             forest: {
+                feature: featureTypes.forest,
+                spriteName: '/tiles/full/forest'
             },
             taiga: {
+                feature: featureTypes.taigaL,
+                spriteName: '/tiles/full/taiga'
             },
             jungle: {
+                spriteName: '/tiles/full/jungle'
             },
             swamp: {
+                spriteName: '/tiles/full/swamp'
             },
             swampPlant: {
+                spriteName: '/tiles/full/swampPlant'
             },
             savanna: {
+                spriteName: '/tiles/full/savanna'
             },
             savannaTree: {
+                spriteName: '/tiles/full/savannaTree'
             },
             taigaSnow: {
+                feature: featureTypes.taigaSnow,
+                spriteName: '/tiles/full/taigaSnow'
             },
         };
         function loadTiles() {
             var deferred = $.Deferred();
             sprites.addSpriteList('terrain.sprites')
                 .then(() => {
-                    tileTypes.blank.sprite = sprites.getSprite('terrain', '/tiles/full/blank');
-                    tileTypes.ocean.sprite = sprites.getSprite('terrain', '/tiles/full/ocean');
-                    tileTypes.tundraSnow.sprite = sprites.getSprite('terrain', '/tiles/full/tundraSnow');
-                    tileTypes.tundra.sprite = sprites.getSprite('terrain', '/tiles/full/tundra');
-                    tileTypes.grassland.sprite = sprites.getSprite('terrain', '/tiles/full/grassland');
-                    tileTypes.semiarid.sprite = sprites.getSprite('terrain', '/tiles/full/semiarid');
-                    tileTypes.desert.sprite = sprites.getSprite('terrain', '/tiles/full/desert');
-                    tileTypes.forest.sprite = sprites.getSprite('terrain', '/tiles/full/forest');
-                    tileTypes.taiga.sprite = sprites.getSprite('terrain', '/tiles/full/taiga');
-                    tileTypes.jungle.sprite = sprites.getSprite('terrain', '/tiles/full/jungle');
-                    tileTypes.swamp.sprite = sprites.getSprite('terrain', '/tiles/full/swamp');
-                    tileTypes.swampPlant.sprite = sprites.getSprite('terrain', '/tiles/full/swampPlant');
-                    tileTypes.savanna.sprite = sprites.getSprite('terrain', '/tiles/full/savanna');
-                    tileTypes.savannaTree.sprite = sprites.getSprite('terrain', '/tiles/full/savannaTree');
-                    tileTypes.taigaSnow.sprite = sprites.getSprite('terrain', '/tiles/full/taigaSnow');
+                    for (let t in tileTypes) {
+                        tileTypes[t].sprite = sprites.getSprite('terrain', tileTypes[t].spriteName);
+                    }
+                    deferred.resolve();
+                });
+            return deferred.promise();
+        }
+        function loadFeatures() {
+            var deferred = $.Deferred();
+            sprites.addSpriteList('feature.sprites')
+                .then(() => {
+                    for (let f in featureTypes) {
+                        featureTypes[f].full.sprite = sprites.getSprite('feature', featureTypes[f].full.spriteName);
+                    }
                     deferred.resolve();
                 });
             return deferred.promise();
         }
         return {
-            tileTypes: tileTypes,
-            loadTiles: loadTiles
+            featureTypes: featureTypes,
+            loadFeatures: loadFeatures,
+            loadTiles: loadTiles,
+            tileTypes: tileTypes
         };
     }
 );
