@@ -66,6 +66,8 @@ define(['hex', 'tile', 'sprites'],
             this.update = function (map, canvas) {
                 this.end.x = this.pos.x + canvas.width;
                 this.end.y = this.pos.y + canvas.height;
+                this.width = canvas.width;
+                this.height = canvas.height;
                 this.minVisibleHex.x = Math.max(0, Math.floor(this.pos.x / map.tileWidthInPixels) - 1);
                 this.minVisibleHex.y = Math.max(0, Math.floor(this.pos.y / map.tileAdvanceVertical) - 1);
                 this.maxVisibleHex.x = Math.min(map.mapWidthInTiles - 1, Math.ceil(this.end.x / map.tileWidthInPixels));
@@ -156,16 +158,18 @@ define(['hex', 'tile', 'sprites'],
                 this.tileHeightInPixels);
         }
         // draw the rendered map to an external canvas
-        HexMap.prototype.draw = function (ctx, canvas, cam) {
+        HexMap.prototype.drawTiles = function (ctx, cam) {
             ctx.drawImage(this.tileCanvas,
                 -this.origin.x + cam.pos.x,
                 -this.origin.y + cam.pos.y,
-                canvas.width,
-                canvas.height,
+                cam.width,
+                cam.height,
                 0,
                 0,
-                canvas.width,
-                canvas.height);
+                cam.width,
+                cam.height);
+        }
+        HexMap.prototype.drawFeatures = function (ctx, cam) {
             for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
                 for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
                     let tile = this.grid.getTileByCoords(x, y);

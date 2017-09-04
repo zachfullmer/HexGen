@@ -84,12 +84,13 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                     canvas.height = window.innerHeight;
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     cam.update(hexMap, canvas);
-                    hexMap.draw(ctx, canvas, cam);
+                    hexMap.drawTiles(ctx, cam);
                     for (let a = 0; a < 1; a++) {
                         let pos = hexMap.pixelCoordsOfTile(2, 4);
                         testAnim.renderFrame();
                         testAnim.draw(ctx, cam, pos.x, pos.y);
                     }
+                    hexMap.drawFeatures(ctx, cam);
                     // end main drawing
                     var t1 = performance.now();
                     var time = Math.round(t1 - t0);
@@ -107,7 +108,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                     currentTile.terrain = tile.tileTypes.desert;
                     currentTile = iterator.next();
                 }
-                console.log(tile.tileTypes.taiga);
                 console.log('start map drawing');
                 hexMap.render();
                 window.requestAnimationFrame(renderAll);
