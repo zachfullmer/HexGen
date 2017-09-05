@@ -1,6 +1,6 @@
 
-define(['hex', 'tile', 'sprites'],
-    function (HexGrid, tile, sprites) {
+define(['hex', 'tile', 'sprites', 'color'],
+    function (HexGrid, tile, sprites, color) {
         function cubeRound(cube) {
             var rx = Math.round(cube.x)
             var ry = Math.round(cube.y)
@@ -126,10 +126,18 @@ define(['hex', 'tile', 'sprites'],
                     get: function () { return _mapHeightInPixels; }
                 }
             });
+            // huge canvas onto which tiles are drawn
             this.tileCanvas = document.createElement('canvas');
             this.tileCanvas.width = this.mapWidthInPixels;
             this.tileCanvas.height = this.mapHeightInPixels;
             this.tileCtx = this.tileCanvas.getContext('2d');
+            // this is where the minimap is drawn to
+            this.miniMapCanvas = document.createElement('canvas');
+            this.miniMapCanvas.width = this.mapWidthInTiles * 2;
+            this.miniMapCanvas.height = this.mapHeightInTiles * 2;
+            this.miniMapCtx = this.miniMapCanvas.getContext('2d');
+            this.miniMapCtx.fillStyle = 'black';
+            this.miniMapCtx.fillRect(0, 0, this.miniMapCanvas.width, this.miniMapCanvas.height);
             this.origin = {
                 x: Math.floor(-this.tileWidthInPixels / 2),
                 y: Math.floor(-this.tileHeightInPixels / 2)
@@ -145,7 +153,11 @@ define(['hex', 'tile', 'sprites'],
         HexMap.prototype.renderTile = function (sourceTile) {
             let pos = this.grid.getPositionById(sourceTile.id);
             if (sourceTile.terrain.tinted) {
-                if (sourceTile.terrain.gradient !== undefined) {
+                if (sourceTile.terrain.gradient === undefined) {
+                    this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
+                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
+                }
+                else {
                     let gradValue = sourceTile[sourceTile.terrain.gradient.type];
                     let keys = sourceTile.terrain.gradient.keys;
                     // clamp the grad value inside the defined range
@@ -153,6 +165,8 @@ define(['hex', 'tile', 'sprites'],
                     gradValue -= keys[0].value;
                     let gradColor = sourceTile.terrain.colorList[gradValue];
                     sourceTile.terrain.tintedSprite.setTint(gradColor.r, gradColor.g, gradColor.b);
+                    this.miniMapCtx.fillStyle = color.rgbToHex(Math.round(gradColor.r), Math.round(gradColor.g), Math.round(gradColor.b));
+                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
                 }
                 sourceTile.terrain.tintedSprite.draw(this.tileCtx,
                     pos.x * this.tileWidthInPixels,
@@ -161,6 +175,8 @@ define(['hex', 'tile', 'sprites'],
                     this.tileHeightInPixels);
             }
             else {
+                this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
+                this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
                 this.tileCtx.drawImage(this.tileSpriteSheet, sourceTile.terrain.sprite.x, sourceTile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,

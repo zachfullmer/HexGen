@@ -5,7 +5,8 @@ requirejs.config({
         xml: 'utility/xml-parsing',
         noise: 'utility/noise',
         tint: 'utility/tint',
-        gradient: 'utility/gradient'
+        gradient: 'utility/gradient',
+        color: 'utility/color'
     }
 });
 
@@ -60,7 +61,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         cam.pos.x = 0;
                         cam.pos.y = 0;
                         gen.generateMap(hexMap);
-                        console.log(tile.tileTypes.ocean);
                         hexMap.render();
                     }
                 });
