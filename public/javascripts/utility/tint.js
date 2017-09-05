@@ -56,6 +56,11 @@ define(function () {
         tintCanvas.width = components[0].height;
         var tintCtx = tintCanvas.getContext('2d');
         this.setTint = function (red, green, blue) {
+            if ((typeof red != 'number' || red < 0 || red > 255) ||
+                (typeof green != 'number' || green < 0 || green > 255) ||
+                (typeof blue != 'number' || blue < 0 || blue > 255)) {
+                throw Error('tint component values must be numbers between 0 and 255');
+            }
             tint.r = red / 255; tint.g = green / 255; tint.b = blue / 255;
         };
         this.draw = function (ctx, destX, destY, destW = tintCanvas.width, destH = tintCanvas.height) {
