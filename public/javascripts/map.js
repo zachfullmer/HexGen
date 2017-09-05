@@ -52,6 +52,7 @@ define(['hex', 'tile', 'sprites', 'color'],
                     var tile = {
                         id: _id.toString(),
                         terrain: null,
+                        feature: null,
                         featureOpacity: 1.0,
                         height: 0,
                         temperature: 0,
@@ -175,8 +176,14 @@ define(['hex', 'tile', 'sprites', 'color'],
                     this.tileHeightInPixels);
             }
             else {
-                this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
-                this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
+                if (sourceTile.feature === null) {
+                    this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
+                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
+                }
+                else {
+                    this.miniMapCtx.fillStyle = sourceTile.feature.colorHex;
+                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
+                }
                 this.tileCtx.drawImage(this.tileSpriteSheet, sourceTile.terrain.sprite.x, sourceTile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
@@ -217,8 +224,8 @@ define(['hex', 'tile', 'sprites', 'color'],
             for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
                 for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
                     let tile = this.grid.getTileByCoords(x, y);
-                    if (tile.terrain.feature !== undefined) {
-                        let featureSprite = tile.terrain.feature.full;
+                    if (tile.feature !== null) {
+                        let featureSprite = tile.feature.full;
                         let halfW = Math.floor(featureSprite.sprite.w / 2);
                         let halfH = Math.floor(featureSprite.sprite.h / 2);
                         let tilePos = this.pixelCoordsOfTile(x, y);
@@ -236,6 +243,12 @@ define(['hex', 'tile', 'sprites', 'color'],
                     }
                 }
             }
+        }
+        HexMap.prototype.drawMiniMap = function (ctx, cam) {
+            let minPix = { x: Math.floor(cam.pos.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.pos.y / this.tileAdvanceVertical) * 2 };
+            let maxPix = { x: Math.floor(cam.end.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.end.y / this.tileAdvanceVertical) * 2 };
+            ctx.drawImage(this.miniMapCanvas, 0, 0);
+            ctx.strokeRect(minPix.x, minPix.y, maxPix.x - minPix.x, maxPix.y - minPix.y);
         }
         HexMap.prototype.pixelCoordsOfTile = function (offsetX, offsetY) {
             var pos = this.grid.getPositionByCoords(offsetX, offsetY);

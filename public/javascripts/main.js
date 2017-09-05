@@ -33,7 +33,12 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     let pixelPos = { x: event.clientX + cam.pos.x, y: event.clientY + cam.pos.y }
                     let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
                     let offset = map.axialToOffset(axial);
+                    let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
+                    let terrain = mouseTile.terrain ? mouseTile.terrain.name : 'none';
+                    let feature = mouseTile.feature ? mouseTile.feature.name : 'none';
                     $('#mousePos').text('mouse: ' + axial.q + ',' + axial.r);
+                    $('#tileTerrain').text('terrain: ' + terrain);
+                    $('#tileFeature').text('feature: ' + feature);
                     return;
                     if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
                         let changedTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
@@ -97,6 +102,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     //     testAnim.draw(ctx, cam, pos.x, pos.y);
                     // }
                     hexMap.drawFeatures(ctx, cam);
+                    hexMap.drawMiniMap(ctx, cam);
                     // end main drawing
                     var t1 = performance.now();
                     var time = Math.round(t1 - t0);
