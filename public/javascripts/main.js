@@ -2,7 +2,8 @@ requirejs.config({
     paths: {
         jquery: 'utility/jquery-1.10.2.min',
         hex: 'utility/hex-grid',
-        xml: 'utility/xml-parsing'
+        xml: 'utility/xml-parsing',
+        noise: 'utility/noise'
     }
 });
 
@@ -11,8 +12,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
         // when sprite loading is done, load map and begin drawing
         $.when(tile.loadTiles(), tile.loadFeatures(), sprites.addAnimList('castle.anim'))
             .done(() => {
-                console.log($('#terrainSpriteSheet')[0]);
-                console.log($('#featureSpriteSheet')[0]);
                 let hexMap = new map.HexMap({
                     mapWidthInTiles: 128,
                     mapHeightInTiles: 128,
@@ -57,6 +56,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
                     if (event.key == 'Enter') {
                         cam.pos.x = 0;
                         cam.pos.y = 0;
+                        console.log('gen');
+                        gen.generateMap(hexMap);
+                        hexMap.render();
                     }
                 });
                 $(window).keyup((event) => {
