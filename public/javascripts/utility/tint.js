@@ -53,7 +53,7 @@ define(function () {
         var tint = { r: 1.0, g: 1.0, b: 1.0 };
         var tintCanvas = document.createElement('canvas');
         tintCanvas.width = components[0].width;
-        tintCanvas.width = components[0].height;
+        tintCanvas.height = components[0].height;
         var tintCtx = tintCanvas.getContext('2d');
         this.setTint = function (red, green, blue) {
             if ((typeof red != 'number' || red < 0 || red > 255) ||
