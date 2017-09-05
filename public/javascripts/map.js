@@ -52,7 +52,11 @@ define(['hex', 'tile', 'sprites'],
                     var tile = {
                         id: _id.toString(),
                         terrain: null,
-                        featureOpacity: 1.0
+                        featureOpacity: 1.0,
+                        height: 0,
+                        temperature: 0,
+                        moisture: 0,
+                        drainage: 0
                     };
 
                     _id += 1;
@@ -137,41 +141,57 @@ define(['hex', 'tile', 'sprites'],
                 currentTile = iterator.next();
             }
         }
-        // (re)draw the whole map, tile-by-tile
-        HexMap.prototype.render = function () {
-            let iterator = this.grid.getTileIterator();
-            let tile = iterator.next();
-            while (tile !== null) {
-                let pos = this.grid.getPositionById(tile.id);
-                this.tileCtx.drawImage(this.tileSpriteSheet, tile.terrain.sprite.x, tile.terrain.sprite.y,
+        // (re)draw a single tile
+        HexMap.prototype.renderTile = function (sourceTile) {
+            let pos = this.grid.getPositionById(sourceTile.id);
+            if (sourceTile.terrain.tinted) {
+                if (sourceTile.terrain.gradient !== undefined) {
+                    let gradValue = sourceTile[sourceTile.terrain.gradient.type];
+                    let keys = sourceTile.terrain.gradient.keys;
+                    // clamp the grad value inside the defined range
+                    gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
+                    gradValue -= keys[0].value;
+                    let gradColor = sourceTile.terrain.colorList[gradValue];
+                    sourceTile.terrain.tintedSprite.setTint(gradColor.r, gradColor.g, gradColor.b);
+                }
+                sourceTile.terrain.tintedSprite.draw(this.tileCtx,
+                    pos.x * this.tileWidthInPixels,
+                    pos.y * this.tileAdvanceVertical,
+                    this.tileWidthInPixels,
+                    this.tileHeightInPixels);
+            }
+            else {
+                this.tileCtx.drawImage(this.tileSpriteSheet, sourceTile.terrain.sprite.x, sourceTile.terrain.sprite.y,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels,
                     pos.x * this.tileWidthInPixels,
                     pos.y * this.tileAdvanceVertical,
                     this.tileWidthInPixels,
                     this.tileHeightInPixels);
-                tile = iterator.next();
             }
         }
-        // (re)draw a single tile, on the given context and at the given coordinates
-        HexMap.prototype.renderTile = function (x, y) {
-            let tile = this.grid.getTileByCoords(x, y);
-            let pos = this.grid.getPositionByCoords(x, y);
-            this.tileCtx.drawImage(this.tileSpriteSheet, tile.terrain.sprite.x, tile.terrain.sprite.y,
-                this.tileWidthInPixels,
-                this.tileHeightInPixels,
-                pos.x * this.tileWidthInPixels,
-                pos.y * this.tileAdvanceVertical,
-                this.tileWidthInPixels,
-                this.tileHeightInPixels);
+        // (re)draw a single tile, at the given coordinates
+        HexMap.prototype.renderTileByPos = function (x, y) {
+            let sourceTile = this.grid.getTileByCoords(x, y);
+            this.renderTile(sourceTile);
+        }
+        // (re)draw the whole map, tile-by-tile
+        HexMap.prototype.render = function () {
+            let iterator = this.grid.getTileIterator();
+            let sourceTile = iterator.next();
+            while (sourceTile !== null) {
+                this.renderTile(sourceTile);
+                sourceTile = iterator.next();
+            }
         }
         // draw the rendered map to an external canvas
         HexMap.prototype.drawTiles = function (ctx, cam) {
+            let zoom = 1;
             ctx.drawImage(this.tileCanvas,
                 -this.origin.x + cam.pos.x,
                 -this.origin.y + cam.pos.y,
-                cam.width,
-                cam.height,
+                cam.width * zoom,
+                cam.height * zoom,
                 0,
                 0,
                 cam.width,

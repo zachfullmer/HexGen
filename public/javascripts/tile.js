@@ -1,6 +1,6 @@
 
-define(['jquery', 'sprites'],
-    function ($, sprites) {
+define(['jquery', 'sprites', 'tint', 'gradient'],
+    function ($, sprites, tint, gradient) {
         var featureTypes = {
             mountain: {
                 name: 'Mountain',
@@ -53,7 +53,15 @@ define(['jquery', 'sprites'],
                 spriteName: '/tiles/full/blank'
             },
             ocean: {
-                spriteName: '/tiles/full/ocean'
+                spriteName: '/tiles/full/ocean',
+                tinted: true,
+                gradient: {
+                    type: 'height',
+                    keys: [
+                        { value: 30, color: { r: 0, g: 42, b: 179 } },
+                        { value: 100, color: { r: 58, g: 146, b: 255 } }
+                    ]
+                }
             },
             tundraSnow: {
                 spriteName: '/tiles/full/tundraSnow'
@@ -102,8 +110,23 @@ define(['jquery', 'sprites'],
             var deferred = $.Deferred();
             sprites.addSpriteList('terrain.sprites')
                 .then(() => {
+                    var sheet = $('#terrainSpriteSheet')[0];
                     for (let t in tileTypes) {
                         tileTypes[t].sprite = sprites.getSprite('terrain', tileTypes[t].spriteName);
+                        if (tileTypes[t].tinted !== undefined) {
+                            tileTypes[t].tintedSprite = new tint.TintedSprite(sheet, tileTypes[t].sprite);
+                        }
+                        if (tileTypes[t].gradient !== undefined) {
+                            let grad = tileTypes[t].gradient;
+                            let indexOffset = grad.keys[0].value;
+                            let colors = [], keys = [];
+                            for (let k in grad.keys) {
+                                colors.push(grad.keys[k].color);
+                                keys.push(grad.keys[k].value - indexOffset);
+                            }
+                            tileTypes[t].colorList = gradient.createGradientMap(colors, keys);
+                            console.log(tileTypes[t]);
+                        }
                     }
                     deferred.resolve();
                 });

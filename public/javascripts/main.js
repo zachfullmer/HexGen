@@ -3,12 +3,14 @@ requirejs.config({
         jquery: 'utility/jquery-1.10.2.min',
         hex: 'utility/hex-grid',
         xml: 'utility/xml-parsing',
-        noise: 'utility/noise'
+        noise: 'utility/noise',
+        tint: 'utility/tint',
+        gradient: 'utility/gradient'
     }
 });
 
-requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
-    function ($, map, tile, xml, sprites, anim, gen) {
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gradient'],
+    function ($, map, tile, xml, sprites, anim, gen, tint, gradient) {
         // when sprite loading is done, load map and begin drawing
         $.when(tile.loadTiles(), tile.loadFeatures(), sprites.addAnimList('castle.anim'))
             .done(() => {
@@ -31,10 +33,11 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
                     let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
                     let offset = map.axialToOffset(axial);
                     $('#mousePos').text('mouse: ' + axial.q + ',' + axial.r);
+                    return;
                     if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
                         let changedTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
                         changedTile.terrain = tile.tileTypes.taiga;
-                        hexMap.renderTile(offset.x, offset.y);
+                        hexMap.renderTileByPos(offset.x, offset.y);
                     }
                 });
                 $(window).keydown((event) => {
@@ -56,8 +59,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
                     if (event.key == 'Enter') {
                         cam.pos.x = 0;
                         cam.pos.y = 0;
-                        console.log('gen');
                         gen.generateMap(hexMap);
+                        console.log(tile.tileTypes.ocean);
                         hexMap.render();
                     }
                 });
@@ -71,6 +74,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
                 });
                 var testAnim = null;
                 var oldTime = null;
+                var tintB = 0;
                 function renderAll(time) {
                     if (oldTime === null) {
                         oldTime = time;
@@ -87,11 +91,11 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     cam.update(hexMap, canvas);
                     hexMap.drawTiles(ctx, cam);
-                    for (let a = 0; a < 1; a++) {
-                        let pos = hexMap.pixelCoordsOfTile(2, 4);
-                        testAnim.renderFrame();
-                        testAnim.draw(ctx, cam, pos.x, pos.y);
-                    }
+                    // for (let a = 0; a < 1; a++) {
+                    //     let pos = hexMap.pixelCoordsOfTile(2, 4);
+                    //     testAnim.renderFrame();
+                    //     testAnim.draw(ctx, cam, pos.x, pos.y);
+                    // }
                     hexMap.drawFeatures(ctx, cam);
                     // end main drawing
                     var t1 = performance.now();

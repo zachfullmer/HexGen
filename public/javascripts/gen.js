@@ -27,7 +27,9 @@ define(['tile', 'map', 'noise'],
             while (currentTile !== null) {
                 let pos = map.grid.getPositionById(currentTile.id);
                 pos.x *= settings.heightMap.scale, pos.y *= settings.heightMap.scale;
-                if (heightMap.scaled2D(pos.x, pos.y) < settings.seaLevel) {
+                var heightVal = heightMap.scaled2D(pos.x, pos.y);
+                currentTile.height = Math.floor(heightVal);
+                if (heightVal < settings.seaLevel) {
                     currentTile.terrain = tile.tileTypes.ocean;
                 }
                 else {
