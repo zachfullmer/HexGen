@@ -130,6 +130,12 @@ define(['hex', 'tile', 'sprites'],
                 x: Math.floor(-this.tileWidthInPixels / 2),
                 y: Math.floor(-this.tileHeightInPixels / 2)
             }
+            let iterator = this.grid.getTileIterator();
+            let currentTile = iterator.next();
+            while (currentTile !== null) {
+                currentTile.terrain = tile.tileTypes.blank;
+                currentTile = iterator.next();
+            }
         }
         // (re)draw the whole map, tile-by-tile
         HexMap.prototype.render = function () {

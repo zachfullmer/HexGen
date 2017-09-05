@@ -6,8 +6,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
-    function ($, map, tile, xml, sprites, anim) {
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen'],
+    function ($, map, tile, xml, sprites, anim, gen) {
         // when sprite loading is done, load map and begin drawing
         $.when(tile.loadTiles(), tile.loadFeatures(), sprites.addAnimList('castle.anim'))
             .done(() => {
@@ -102,12 +102,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim'],
                 }
                 // set up the map
                 testAnim = new anim.Anim(sprites.animLists.castle['castle']);
-                let iterator = hexMap.grid.getTileIterator();
-                let currentTile = iterator.next();
-                while (currentTile !== null) {
-                    currentTile.terrain = tile.tileTypes.desert;
-                    currentTile = iterator.next();
-                }
+                gen.generateMap(hexMap);
                 console.log('start map drawing');
                 hexMap.render();
                 window.requestAnimationFrame(renderAll);
