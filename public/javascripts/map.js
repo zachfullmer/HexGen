@@ -244,10 +244,10 @@ define(['hex', 'tile', 'sprites', 'color'],
                 }
             }
         }
-        HexMap.prototype.drawMiniMap = function (ctx, cam) {
+        HexMap.prototype.drawMiniMap = function (ctx, cam, destX, destY, destW, destH) {
             let minPix = { x: Math.floor(cam.pos.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.pos.y / this.tileAdvanceVertical) * 2 };
             let maxPix = { x: Math.floor(cam.end.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.end.y / this.tileAdvanceVertical) * 2 };
-            ctx.drawImage(this.miniMapCanvas, 0, 0);
+            ctx.drawImage(this.miniMapCanvas, destX, destY, destW, destH);
             ctx.strokeRect(minPix.x, minPix.y, maxPix.x - minPix.x, maxPix.y - minPix.y);
         }
         HexMap.prototype.pixelCoordsOfTile = function (offsetX, offsetY) {
