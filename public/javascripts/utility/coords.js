@@ -1,7 +1,20 @@
 define(function () {
+    var coords = {};
+    coords.cartToPolar = function (cart) {
+        let polar = {};
+        polar.x = Math.sqrt(cart.x * cart.x + cart.y * cart.y);
+        polar.y = Math.atan2(cart.y, cart.x);
+        return polar;
+    }
+    coords.polarToCart = function (polar) {
+        let cart = {};
+        cart.x = polar.x * Math.cos(polar.y);
+        cart.y = polar.x * Math.sin(polar.y);
+        return cart;
+    }
     // get the coordinates at point t along a cubic bezier curve defined by points
     // 0.0 <= t <= 1.0
-    bezier.curveCubic = function (points, t) {
+    coords.curveCubic = function (points, t) {
         let t2 = t * t;
         let t3 = t2 * t;
         let mt = 1 - t;
@@ -13,7 +26,7 @@ define(function () {
         return result;
     }
     // approximate the length of a cubic curve
-    bezier.lengthCubic = function (points) {
+    coords.lengthCubic = function (points) {
         // http://www.lemoda.net/maths/bezier-length/index.html
         let t = 0;
         let i = 0;
@@ -32,5 +45,5 @@ define(function () {
         }
         return length;
     }
-    return bezier;
+    return coords;
 });
