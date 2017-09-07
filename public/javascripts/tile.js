@@ -155,7 +155,6 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                                     tileTypes[t].sprite.w,
                                     tileTypes[t].sprite.h);
                             }
-                            console.log(tileTypes[t]);
                         }
                         if (tileTypes[t].color === undefined) {
                             throw Error('tile "' + tileTypes[t].name + '" has no color attribute');
@@ -165,6 +164,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                             tileTypes[t].color.g,
                             tileTypes[t].color.b);
                     }
+                    console.log('tiles loaded');
                     deferred.resolve();
                 });
             return deferred.promise();

@@ -1,10 +1,12 @@
 define(['jquery', 'xml'],
     function ($, xml) {
         function addSpriteSheet(fileName) {
+            var deferred = $.Deferred();
             var fileNameMinusExt = fileName.match(/(.+)\./)[1];
             if ($('#' + fileNameMinusExt + 'SpriteSheet').length > 0) {
                 console.log('sprite sheet "' + fileName + '" already exists');
-                return;
+                deferred.resolve();
+                return deferred.promise();
             }
             console.log('loading sprite sheet "' + fileName + '"');
             var img = document.createElement('img');
@@ -12,6 +14,10 @@ define(['jquery', 'xml'],
             img.id = fileNameMinusExt + 'SpriteSheet';
             img.classList.add('sprite-sheet');
             document.body.appendChild(img);
+            img.onload = () => {
+                deferred.resolve();
+            }
+            return deferred.promise();
         }
 
         function readFolder(folder, root = true) {
@@ -52,14 +58,16 @@ define(['jquery', 'xml'],
                     var img = xml.get(xmlData, 'img')[0];
                     var fileName = img.getAttribute('name');
                     var fileNameMinusExt = fileName.match(/(.+)\./)[1];
-                    addSpriteSheet(fileName);
-                    var folder = xml.get(img, 'definitions')[0];
-                    folder = xml.get(folder, 'dir')[0];
-                    spriteLists[fileNameMinusExt] = {
-                        sheet: $('#' + fileNameMinusExt + 'SpriteSheet')[0],
-                        sprites: readFolder(folder)
-                    };
-                    deferred.resolve();
+                    addSpriteSheet(fileName)
+                        .then(() => {
+                            var folder = xml.get(img, 'definitions')[0];
+                            folder = xml.get(folder, 'dir')[0];
+                            spriteLists[fileNameMinusExt] = {
+                                sheet: $('#' + fileNameMinusExt + 'SpriteSheet')[0],
+                                sprites: readFolder(folder)
+                            };
+                            deferred.resolve();
+                        })
                 }
             });
 

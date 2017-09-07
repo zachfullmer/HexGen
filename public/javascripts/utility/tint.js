@@ -41,10 +41,11 @@ define(function () {
             compCtx.putImageData(to, 0, 0);
 
             // image is _slightly_ faster then canvas for this, so convert
-            var imgComp = new Image();
-            imgComp.src = canvas.toDataURL();
+            // ACTUALLY it's also async and messes everything up so I'm just gonna not use it
+            // var imgComp = new Image();
+            // imgComp.src = canvas.toDataURL();
 
-            rgbks.push(imgComp);
+            rgbks.push(canvas);
         }
         return rgbks;
     }
