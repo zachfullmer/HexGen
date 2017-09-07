@@ -1,10 +1,24 @@
 extends layout
 
 block content
-    canvas#drawSurface
-    img.sprite-sheet(src="images/terrain.png")
-    div#infoBox
-        p#camPos
-        p#mousePos
-        p#tileTerrain
-        p#tileFeature
+  canvas#drawSurface
+  img.sprite-sheet(src="images/terrain.png")
+  div#infoBox
+    canvas#miniMap
+    table
+      tr
+        td camera:
+        td
+          #camPos
+      tr
+        td mouse:
+        td
+          #mousePos
+      tr
+        td terrain:
+        td
+          #tileTerrain
+      tr
+        td feature:
+        td
+          #tileFeature

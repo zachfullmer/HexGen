@@ -70,9 +70,10 @@ define(['hex', 'tile', 'sprites', 'color'],
             this.end = { x: 0, y: 0 };
             this.minVisibleHex = { x: 0, y: 0 };
             this.maxVisibleHex = { x: 0, y: 0 };
+            this.zoomFactor = 1.0;
             this.update = function (map, canvas) {
-                this.end.x = this.pos.x + canvas.width;
-                this.end.y = this.pos.y + canvas.height;
+                this.end.x = (this.pos.x + (canvas.width * this.zoomFactor));
+                this.end.y = (this.pos.y + (canvas.height * this.zoomFactor));
                 this.width = canvas.width;
                 this.height = canvas.height;
                 this.minVisibleHex.x = Math.max(0, Math.floor(this.pos.x / map.tileWidthInPixels) - 1);
@@ -209,12 +210,11 @@ define(['hex', 'tile', 'sprites', 'color'],
         }
         // draw the rendered map to an external canvas
         HexMap.prototype.drawTiles = function (ctx, cam) {
-            let zoom = 1;
             ctx.drawImage(this.tileCanvas,
                 -this.origin.x + cam.pos.x,
                 -this.origin.y + cam.pos.y,
-                cam.width * zoom,
-                cam.height * zoom,
+                cam.width * cam.zoomFactor,
+                cam.height * cam.zoomFactor,
                 0,
                 0,
                 cam.width,
@@ -230,10 +230,10 @@ define(['hex', 'tile', 'sprites', 'color'],
                         let halfH = Math.floor(featureSprite.sprite.h / 2);
                         let tilePos = this.pixelCoordsOfTile(x, y);
                         let drawRect = {
-                            x: tilePos.x - halfW + featureSprite.offsetX - cam.pos.x,
-                            y: tilePos.y - halfH + featureSprite.offsetY - cam.pos.y,
-                            w: featureSprite.sprite.w,
-                            h: featureSprite.sprite.h
+                            x: (tilePos.x - halfW + featureSprite.offsetX - cam.pos.x) / cam.zoomFactor,
+                            y: (tilePos.y - halfH + featureSprite.offsetY - cam.pos.y) / cam.zoomFactor,
+                            w: featureSprite.sprite.w / cam.zoomFactor,
+                            h: featureSprite.sprite.h / cam.zoomFactor
                         };
                         ctx.globalAlpha = tile.featureOpacity;
                         ctx.drawImage(featureSpriteSheet,

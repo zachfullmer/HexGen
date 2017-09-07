@@ -6,7 +6,8 @@ requirejs.config({
         noise: 'utility/noise',
         tint: 'utility/tint',
         gradient: 'utility/gradient',
-        color: 'utility/color'
+        color: 'utility/color',
+        coords: 'utility/coords'
     }
 });
 
@@ -27,24 +28,19 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                 var canvas = $('#drawSurface')[0];
                 var ctx = canvas.getContext('2d');
                 var cam = new map.Camera();
+                cam.zoomFactor = 1.5;
                 var camVel = { x: 0, y: 0 };
                 var camSpeed = 15;
                 window.addEventListener('mousemove', (event) => {
-                    let pixelPos = { x: event.clientX + cam.pos.x, y: event.clientY + cam.pos.y }
+                    let pixelPos = { x: ((event.clientX * cam.zoomFactor) + cam.pos.x), y: ((event.clientY * cam.zoomFactor) + cam.pos.y) }
                     let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
                     let offset = map.axialToOffset(axial);
                     let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
-                    let terrain = mouseTile.terrain ? mouseTile.terrain.name : 'none';
-                    let feature = mouseTile.feature ? mouseTile.feature.name : 'none';
-                    $('#mousePos').text('mouse: ' + axial.q + ',' + axial.r);
-                    $('#tileTerrain').text('terrain: ' + terrain);
-                    $('#tileFeature').text('feature: ' + feature);
-                    return;
-                    if (hexMap.grid.isWithinBoundaries(offset.x, offset.y)) {
-                        let changedTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
-                        changedTile.terrain = tile.tileTypes.taiga;
-                        hexMap.renderTileByPos(offset.x, offset.y);
-                    }
+                    let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
+                    let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
+                    $('#mousePos').text(axial.q + ',' + axial.r);
+                    $('#tileTerrain').text(terrain);
+                    $('#tileFeature').text(feature);
                 });
                 $(window).keydown((event) => {
                     if (event.repeat) {
@@ -80,6 +76,10 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                 var testAnim = null;
                 var oldTime = null;
                 var tintB = 0;
+                var miniMap = $('#miniMap')[0];
+                miniMap.width = hexMap.miniMapCanvas.width;
+                miniMap.height = hexMap.miniMapCanvas.height;
+                var miniMapCtx = miniMap.getContext('2d');
                 function renderAll(time) {
                     if (oldTime === null) {
                         oldTime = time;
@@ -87,8 +87,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     var deltaTime = time - oldTime;
                     oldTime = time;
                     testAnim.update(deltaTime);
-                    cam.pos.x += camVel.x, cam.pos.y += camVel.y;
-                    $('#camPos').text('camera: ' + cam.pos.x + ',' + cam.pos.y);
+                    cam.pos.x += camVel.x / 16 * deltaTime, cam.pos.y += camVel.y / 16 * deltaTime;
+                    $('#camPos').text(Math.floor(cam.pos.x) + ',' + Math.floor(cam.pos.y));
                     var t0 = performance.now();
                     // main drawing
                     canvas.width = window.innerWidth;
@@ -102,7 +102,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     //     testAnim.draw(ctx, cam, pos.x, pos.y);
                     // }
                     hexMap.drawFeatures(ctx, cam);
-                    hexMap.drawMiniMap(ctx, cam);
+                    hexMap.drawMiniMap(miniMapCtx, cam, 0, 0, miniMap.width, miniMap.height);
                     // end main drawing
                     var t1 = performance.now();
                     var time = Math.round(t1 - t0);

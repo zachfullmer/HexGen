@@ -15,13 +15,14 @@ img.sprite-sheet {
 
 div#infoBox {
     position: fixed;
-    background: #123;
     color: #fff;
     top: 0;
     right: 0;
     padding: 10px;
-    width: 200px;
-    height: 150px;
-    opacity: 0.8;
+    background-color: rgba(16, 58, 100, 0.80);
     border: solid 1px #aaa;
+}
+
+#miniMap {
+    opacity: 1.0;
 }
