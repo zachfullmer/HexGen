@@ -62,7 +62,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         cam.pos.x = 0;
                         cam.pos.y = 0;
                         gen.generateMap(hexMap);
-                        hexMap.render();
+                        hexMap.renderMiniMap();
                     }
                 });
                 $(window).keyup((event) => {
@@ -96,11 +96,6 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     cam.update(hexMap, canvas);
                     hexMap.drawTiles(ctx, cam);
-                    // for (let a = 0; a < 1; a++) {
-                    //     let pos = hexMap.pixelCoordsOfTile(2, 4);
-                    //     testAnim.renderFrame();
-                    //     testAnim.draw(ctx, cam, pos.x, pos.y);
-                    // }
                     hexMap.drawFeatures(ctx, cam);
                     hexMap.drawMiniMap(miniMapCtx, cam, 0, 0, miniMap.width, miniMap.height);
                     // end main drawing
@@ -116,7 +111,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                 testAnim = new anim.Anim(sprites.animLists.castle['castle']);
                 gen.generateMap(hexMap);
                 console.log('start map drawing');
-                hexMap.render();
+                hexMap.renderMiniMap();
                 window.requestAnimationFrame(renderAll);
             });
     });

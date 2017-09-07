@@ -6,7 +6,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                 name: 'Mountain',
                 color: { r: 98, g: 83, b: 126 },
                 full:
-                { spriteName: '/mountains/full/1', offsetX: 1, offsetY: -14 },
+                { spriteName: '/mountains/full/1', offsetX: 0, offsetY: -8 },
                 half:
                 { spriteName: '/mountains/half/1', offsetX: 1, offsetY: -6 },
                 quarter:
@@ -142,6 +142,19 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                                 keys.push(grad.keys[k].value - indexOffset);
                             }
                             tileTypes[t].colorList = gradient.createGradientMap(colors, keys);
+                            tileTypes[t].gradCanvas = document.createElement('canvas');
+                            tileTypes[t].gradCtx = tileTypes[t].gradCanvas.getContext('2d');
+                            tileTypes[t].gradCanvas.width = tileTypes[t].sprite.w * tileTypes[t].colorList.length;
+                            tileTypes[t].gradCanvas.height = tileTypes[t].sprite.h;
+                            for (let c in tileTypes[t].colorList) {
+                                let color = tileTypes[t].colorList[c];
+                                tileTypes[t].tintedSprite.setTint(color.r, color.g, color.b);
+                                tileTypes[t].tintedSprite.draw(tileTypes[t].gradCtx,
+                                    tileTypes[t].sprite.w * c,
+                                    0,
+                                    tileTypes[t].sprite.w,
+                                    tileTypes[t].sprite.h);
+                            }
                             console.log(tileTypes[t]);
                         }
                         if (tileTypes[t].color === undefined) {

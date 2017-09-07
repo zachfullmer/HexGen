@@ -128,11 +128,6 @@ define(['hex', 'tile', 'sprites', 'color'],
                     get: function () { return _mapHeightInPixels; }
                 }
             });
-            // huge canvas onto which tiles are drawn
-            this.tileCanvas = document.createElement('canvas');
-            this.tileCanvas.width = this.mapWidthInPixels;
-            this.tileCanvas.height = this.mapHeightInPixels;
-            this.tileCtx = this.tileCanvas.getContext('2d');
             // this is where the minimap is drawn to
             this.miniMapCanvas = document.createElement('canvas');
             this.miniMapCanvas.width = this.mapWidthInTiles * 2;
@@ -151,81 +146,86 @@ define(['hex', 'tile', 'sprites', 'color'],
                 currentTile = iterator.next();
             }
         }
-        // (re)draw a single tile
-        HexMap.prototype.renderTile = function (sourceTile) {
-            let pos = this.grid.getPositionById(sourceTile.id);
+        HexMap.prototype.renderMiniMapTile = function (sourceTile) {
+            var pos = this.grid.getPositionById(sourceTile.id);
             if (sourceTile.terrain.tinted) {
-                if (sourceTile.terrain.gradient === undefined) {
-                    this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
-                }
-                else {
-                    let gradValue = sourceTile[sourceTile.terrain.gradient.type];
-                    let keys = sourceTile.terrain.gradient.keys;
-                    // clamp the grad value inside the defined range
-                    gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
-                    gradValue -= keys[0].value;
-                    let gradColor = sourceTile.terrain.colorList[gradValue];
-                    sourceTile.terrain.tintedSprite.setTint(gradColor.r, gradColor.g, gradColor.b);
-                    this.miniMapCtx.fillStyle = color.rgbToHex(Math.round(gradColor.r), Math.round(gradColor.g), Math.round(gradColor.b));
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
-                }
-                sourceTile.terrain.tintedSprite.draw(this.tileCtx,
-                    pos.x * this.tileWidthInPixels,
-                    pos.y * this.tileAdvanceVertical,
-                    this.tileWidthInPixels,
-                    this.tileHeightInPixels);
+                let gradValue = sourceTile[sourceTile.terrain.gradient.type];
+                let keys = sourceTile.terrain.gradient.keys;
+                // clamp the grad value inside the defined range
+                gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
+                gradValue -= keys[0].value;
+                let gradColor = sourceTile.terrain.colorList[gradValue];
+                this.miniMapCtx.fillStyle = color.rgbToHex(Math.round(gradColor.r), Math.round(gradColor.g), Math.round(gradColor.b));
+                this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
             }
             else {
                 if (sourceTile.feature === null) {
                     this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
                 }
                 else {
                     this.miniMapCtx.fillStyle = sourceTile.feature.colorHex;
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
                 }
-                this.tileCtx.drawImage(this.tileSpriteSheet, sourceTile.terrain.sprite.x, sourceTile.terrain.sprite.y,
-                    this.tileWidthInPixels,
-                    this.tileHeightInPixels,
-                    pos.x * this.tileWidthInPixels,
-                    pos.y * this.tileAdvanceVertical,
-                    this.tileWidthInPixels,
-                    this.tileHeightInPixels);
+                this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
             }
         }
-        // (re)draw a single tile, at the given coordinates
-        HexMap.prototype.renderTileByPos = function (x, y) {
-            let sourceTile = this.grid.getTileByCoords(x, y);
-            this.renderTile(sourceTile);
+        HexMap.prototype.renderMiniMapTileByCoord = function (x, y) {
+            var sourceTile = this.grid.getTileByCoords(x, y);
+            this.renderMiniMapTile(sourceTile);
         }
-        // (re)draw the whole map, tile-by-tile
-        HexMap.prototype.render = function () {
-            let iterator = this.grid.getTileIterator();
-            let sourceTile = iterator.next();
-            while (sourceTile !== null) {
-                this.renderTile(sourceTile);
-                sourceTile = iterator.next();
+        HexMap.prototype.renderMiniMap = function () {
+            var iterator = this.grid.getTileIterator();
+            var currentTile = iterator.next();
+            while (currentTile !== null) {
+                this.renderMiniMapTile(currentTile);
+                currentTile = iterator.next();
             }
         }
-        // draw the rendered map to an external canvas
+        // draw the terrain tiles to an external canvas
         HexMap.prototype.drawTiles = function (ctx, cam) {
-            ctx.drawImage(this.tileCanvas,
-                -this.origin.x + cam.pos.x,
-                -this.origin.y + cam.pos.y,
-                cam.width * cam.zoomFactor,
-                cam.height * cam.zoomFactor,
-                0,
-                0,
-                cam.width,
-                cam.height);
+            let halfW = Math.floor(this.tileWidthInPixels / 2);
+            let halfH = Math.floor(this.tileHeightInPixels / 2);
+            for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
+                for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
+                    let sourceTile = this.grid.getTileByCoords(x, y);
+                    let tilePos = this.pixelCoordsOfTile(x, y);
+                    if (sourceTile.terrain.tinted) {
+                        let gradValue = sourceTile[sourceTile.terrain.gradient.type];
+                        let keys = sourceTile.terrain.gradient.keys;
+                        // clamp the grad value inside the defined range
+                        gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
+                        gradValue -= keys[0].value;
+                        let drawRect = {
+                            x: (tilePos.x - halfW - cam.pos.x) / cam.zoomFactor,
+                            y: (tilePos.y - halfH - cam.pos.y) / cam.zoomFactor,
+                            w: this.tileWidthInPixels / cam.zoomFactor,
+                            h: this.tileHeightInPixels / cam.zoomFactor
+                        };
+                        ctx.drawImage(sourceTile.terrain.gradCanvas,
+                            this.tileWidthInPixels * gradValue, 0, this.tileWidthInPixels, this.tileHeightInPixels,
+                            drawRect.x, drawRect.y, drawRect.w, drawRect.h);
+                    }
+                    else {
+                        let terrainSprite = sourceTile.terrain.sprite;
+                        let drawRect = {
+                            x: (tilePos.x - halfW - cam.pos.x) / cam.zoomFactor,
+                            y: (tilePos.y - halfH - cam.pos.y) / cam.zoomFactor,
+                            w: terrainSprite.w / cam.zoomFactor,
+                            h: terrainSprite.h / cam.zoomFactor
+                        };
+                        ctx.drawImage(this.tileSpriteSheet,
+                            terrainSprite.x, terrainSprite.y, terrainSprite.w, terrainSprite.h,
+                            drawRect.x, drawRect.y, drawRect.w, drawRect.h);
+                    }
+                }
+            }
         }
+        // draw the map features to an external canvas
         HexMap.prototype.drawFeatures = function (ctx, cam) {
             for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
                 for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
-                    let tile = this.grid.getTileByCoords(x, y);
-                    if (tile.feature !== null) {
-                        let featureSprite = tile.feature.full;
+                    let sourceTile = this.grid.getTileByCoords(x, y);
+                    if (sourceTile.feature !== null) {
+                        let featureSprite = sourceTile.feature.full;
                         let halfW = Math.floor(featureSprite.sprite.w / 2);
                         let halfH = Math.floor(featureSprite.sprite.h / 2);
                         let tilePos = this.pixelCoordsOfTile(x, y);
@@ -235,7 +235,7 @@ define(['hex', 'tile', 'sprites', 'color'],
                             w: featureSprite.sprite.w / cam.zoomFactor,
                             h: featureSprite.sprite.h / cam.zoomFactor
                         };
-                        ctx.globalAlpha = tile.featureOpacity;
+                        ctx.globalAlpha = sourceTile.featureOpacity;
                         ctx.drawImage(featureSpriteSheet,
                             featureSprite.sprite.x, featureSprite.sprite.y, featureSprite.sprite.w, featureSprite.sprite.h,
                             drawRect.x, drawRect.y, drawRect.w, drawRect.h);
