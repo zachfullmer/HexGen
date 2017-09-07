@@ -14,23 +14,23 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
             },
             forestS: {
                 color: { r: 54, g: 173, b: 67 },
-                full: { spriteName: '/plants/forest/s1', offsetX: -5, offsetY: -4 }
+                full: { spriteName: '/plants/forest/s1', offsetX: -3, offsetY: -6 }
             },
             forestM: {
                 color: { r: 34, g: 149, b: 46 },
-                full: { spriteName: '/plants/forest/m1', offsetX: -3, offsetY: -17 }
+                full: { spriteName: '/plants/forest/m1', offsetX: 0, offsetY: -11 }
             },
             forestL: {
                 color: { r: 22, g: 134, b: 20 },
-                full: { spriteName: '/plants/forest/l1', offsetX: -3, offsetY: -20 }
+                full: { spriteName: '/plants/forest/l1', offsetX: 0, offsetY: -14 }
             },
             taigaS: {
                 color: { r: 50, g: 185, b: 149 },
-                full: { spriteName: '/plants/pine/s1', offsetX: -8, offsetY: -15 }
+                full: { spriteName: '/plants/pine/s1', offsetX: -4, offsetY: -11 }
             },
             taigaM: {
                 color: { r: 49, g: 172, b: 140 },
-                full: { spriteName: '/plants/pine/m1', offsetX: -6, offsetY: -18 }
+                full: { spriteName: '/plants/pine/m1', offsetX: 0, offsetY: -14 }
             },
             taigaL: {
                 color: { r: 49, g: 158, b: 131 },
@@ -38,11 +38,11 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
             },
             taigaSnowS: {
                 color: { r: 136, g: 217, b: 195 },
-                full: { spriteName: '/plants/pineSnow/s1', offsetX: -8, offsetY: -15 }
+                full: { spriteName: '/plants/pineSnow/s1', offsetX: -4, offsetY: -11 }
             },
             taigaSnowM: {
                 color: { r: 125, g: 188, b: 171 },
-                full: { spriteName: '/plants/pineSnow/m1', offsetX: -6, offsetY: -18 }
+                full: { spriteName: '/plants/pineSnow/m1', offsetX: 0, offsetY: -14 }
             },
             taigaSnowL: {
                 color: { r: 112, g: 162, b: 149 },
