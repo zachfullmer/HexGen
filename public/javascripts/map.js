@@ -71,9 +71,9 @@ define(['hex', 'tile', 'sprites', 'color'],
             this.minVisibleHex = { x: 0, y: 0 };
             this.maxVisibleHex = { x: 0, y: 0 };
             this.zoomFactor = 1.0;
-            this.update = function (map, canvas) {
-                this.end.x = (this.pos.x + (canvas.width * this.zoomFactor));
-                this.end.y = (this.pos.y + (canvas.height * this.zoomFactor));
+            this.update = function (map, canvas, pixelRatio) {
+                this.end.x = (this.pos.x + (canvas.width * this.zoomFactor / pixelRatio));
+                this.end.y = (this.pos.y + (canvas.height * this.zoomFactor / pixelRatio));
                 this.width = canvas.width;
                 this.height = canvas.height;
                 this.minVisibleHex.x = Math.max(0, Math.floor(this.pos.x / map.tileWidthInPixels) - 1);

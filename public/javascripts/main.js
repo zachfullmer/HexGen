@@ -7,12 +7,13 @@ requirejs.config({
         tint: 'utility/tint',
         gradient: 'utility/gradient',
         color: 'utility/color',
-        coords: 'utility/coords'
+        coords: 'utility/coords',
+        scaling: 'utility/scaling'
     }
 });
 
-requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gradient'],
-    function ($, map, tile, xml, sprites, anim, gen, tint, gradient) {
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gradient', 'scaling'],
+    function ($, map, tile, xml, sprites, anim, gen, tint, gradient, scaling) {
         // when sprite loading is done, load map and begin drawing
         $.when(tile.loadTiles(), tile.loadFeatures(), sprites.addAnimList('castle.anim'))
             .done(() => {
@@ -28,9 +29,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                 var canvas = $('#drawSurface')[0];
                 var ctx = canvas.getContext('2d');
                 var cam = new map.Camera();
-                cam.zoomFactor = 1.5;
                 var camVel = { x: 0, y: 0 };
                 var camSpeed = 15;
+                var dpiScaling = false;
                 window.addEventListener('mousemove', (event) => {
                     let pixelPos = { x: ((event.clientX * cam.zoomFactor) + cam.pos.x), y: ((event.clientY * cam.zoomFactor) + cam.pos.y) }
                     let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
@@ -73,6 +74,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         camVel.y = 0;
                     }
                 });
+                $('#dpiCheck').on('change', (event) => {
+                    dpiScaling = event.target.checked;
+                });
                 var testAnim = null;
                 var oldTime = null;
                 var tintB = 0;
@@ -91,10 +95,18 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                     $('#camPos').text(Math.floor(cam.pos.x) + ',' + Math.floor(cam.pos.y));
                     var t0 = performance.now();
                     // main drawing
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
+                    let pixelRatio = scaling.getPixelRatio(ctx);
+                    if (dpiScaling) {
+                        cam.zoomFactor = pixelRatio;
+                        scaling.scaleCanvas(canvas, ctx, window.innerWidth, window.innerHeight);
+                    }
+                    else {
+                        cam.zoomFactor = 1.0;
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                    }
+                    cam.update(hexMap, canvas, dpiScaling ? pixelRatio : 1.0);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    cam.update(hexMap, canvas);
                     hexMap.drawTiles(ctx, cam);
                     hexMap.drawFeatures(ctx, cam);
                     hexMap.drawMiniMap(miniMapCtx, cam, 0, 0, miniMap.width, miniMap.height);
