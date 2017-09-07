@@ -98,7 +98,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
             },
             jungle: {
                 spriteName: '/tiles/full/jungle',
-                color: { r: 79, g: 167, b: 0 }
+                color: { r: 114, g: 167, b: 0 }
             },
             swamp: {
                 spriteName: '/tiles/full/swamp',
