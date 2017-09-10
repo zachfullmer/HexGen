@@ -126,13 +126,22 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
             var deferred = $.Deferred();
             sprites.addSpriteList('terrain.sprites')
                 .then(() => {
-                    var sheet = $('#terrainSpriteSheet')[0];
+                    var sheet = PIXI.loader.resources['images/terrain.png'].texture.baseTexture;
                     for (let t in tileTypes) {
                         tileTypes[t].name = t;
                         tileTypes[t].sprite = sprites.getSprite('terrain', tileTypes[t].spriteName);
-                        if (tileTypes[t].tinted !== undefined) {
-                            tileTypes[t].tintedSprite = new tint.TintedSprite(sheet, tileTypes[t].sprite);
-                        }
+
+                        // tinted: true,
+                        // gradient: {
+                        //     type: 'height',
+                        //     keys: [
+                        //         { value: 30, color: { r: 0, g: 42, b: 179 } },
+                        //         { value: 100, color: { r: 58, g: 146, b: 255 } }
+                        //     ]
+                        // }
+                        // if (tileTypes[t].tinted !== undefined) {
+                        //     tileTypes[t].tintedSprite = new tint.TintedSprite(sheet, tileTypes[t].sprite);
+                        // }
                         if (tileTypes[t].gradient !== undefined) {
                             let grad = tileTypes[t].gradient;
                             let indexOffset = grad.keys[0].value;
@@ -142,24 +151,11 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                                 keys.push(grad.keys[k].value - indexOffset);
                             }
                             tileTypes[t].colorList = gradient.createGradientMap(colors, keys);
-                            tileTypes[t].gradCanvas = document.createElement('canvas');
-                            tileTypes[t].gradCtx = tileTypes[t].gradCanvas.getContext('2d');
-                            tileTypes[t].gradCanvas.width = tileTypes[t].sprite.w * tileTypes[t].colorList.length;
-                            tileTypes[t].gradCanvas.height = tileTypes[t].sprite.h;
-                            for (let c in tileTypes[t].colorList) {
-                                let color = tileTypes[t].colorList[c];
-                                tileTypes[t].tintedSprite.setTint(color.r, color.g, color.b);
-                                tileTypes[t].tintedSprite.draw(tileTypes[t].gradCtx,
-                                    tileTypes[t].sprite.w * c,
-                                    0,
-                                    tileTypes[t].sprite.w,
-                                    tileTypes[t].sprite.h);
-                            }
                         }
                         if (tileTypes[t].color === undefined) {
                             throw Error('tile "' + tileTypes[t].name + '" has no color attribute');
                         }
-                        tileTypes[t].colorHex = color.rgbToHex(
+                        tileTypes[t].colorHex = color.rgbToHexInt(
                             tileTypes[t].color.r,
                             tileTypes[t].color.g,
                             tileTypes[t].color.b);
@@ -179,7 +175,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                         if (featureTypes[f].color === undefined) {
                             throw Error('feature "' + featureTypes[f].name + '" has no color attribute');
                         }
-                        featureTypes[f].colorHex = color.rgbToHex(
+                        featureTypes[f].colorHex = color.rgbToHexInt(
                             featureTypes[f].color.r,
                             featureTypes[f].color.g,
                             featureTypes[f].color.b);

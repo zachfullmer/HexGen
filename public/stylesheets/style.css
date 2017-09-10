@@ -26,3 +26,8 @@ div#infoBox {
 #miniMap {
     opacity: 1.0;
 }
+
+canvas {
+    width: 100vw;
+    height: 100vh;
+}

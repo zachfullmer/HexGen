@@ -80,123 +80,123 @@ define(['tile', 'map', 'noise'],
                 currentTile.drainage = Math.floor(drainVal);
                 currentTile.moisture = Math.floor(moistVal);
                 currentTile.mount = Math.floor(mountVal);
-                currentTile.feature = null;
+                currentTile.setFeature(null);
                 if (mountVal < settings.mountLevel) {
                     mtList.push(currentTile);
                 }
                 if (heightVal < settings.seaLevel) {
-                    currentTile.terrain = tile.tileTypes.ocean;
+                    currentTile.setTerrain(tile.tileTypes.ocean);
                 }
                 else {
                     if (tempVal < settings.snow) {
                         // snoooow
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.terrain = tile.tileTypes.tundraSnow;
+                            currentTile.setTerrain(tile.tileTypes.tundraSnow);
                             if (spotVal >= settings.spot) {
                                 if (moistVal < settings.forest[1]) {
-                                    currentTile.feature = tile.featureTypes.taigaSnowS;
+                                    currentTile.setFeature(tile.featureTypes.taigaSnowS);
                                 }
                                 else if (moistVal < settings.forest[2]) {
-                                    currentTile.feature = tile.featureTypes.taigaSnowM;
+                                    currentTile.setFeature(tile.featureTypes.taigaSnowM);
                                 }
                                 else {
-                                    currentTile.feature = tile.featureTypes.taigaSnowL;
+                                    currentTile.setFeature(tile.featureTypes.taigaSnowL);
                                 }
                             }
                         }
                         else {
-                            currentTile.terrain = tile.tileTypes.tundraSnow;
+                            currentTile.setTerrain(tile.tileTypes.tundraSnow);
                             if (spotVal < settings.spot) {
-                                currentTile.feature = tile.featureTypes.taigaSnowS;
+                                currentTile.setFeature(tile.featureTypes.taigaSnowS);
                             }
                         }
                     }
                     else if (tempVal < settings.cold) {
                         // cold biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.terrain = tile.tileTypes.tundra;
+                            currentTile.setTerrain(tile.tileTypes.tundra);
                             if (spotVal >= settings.spot) {
                                 if (moistVal < settings.forest[1]) {
-                                    currentTile.feature = tile.featureTypes.taigaS;
+                                    currentTile.setFeature(tile.featureTypes.taigaS);
                                 }
                                 else if (moistVal < settings.forest[2]) {
-                                    currentTile.feature = tile.featureTypes.taigaM;
+                                    currentTile.setFeature(tile.featureTypes.taigaM);
                                 }
                                 else {
-                                    currentTile.feature = tile.featureTypes.taigaL;
+                                    currentTile.setFeature(tile.featureTypes.taigaL);
                                 }
                             }
                         }
                         else {
-                            currentTile.terrain = tile.tileTypes.tundra;
+                            currentTile.setTerrain(tile.tileTypes.tundra);
                             if (spotVal < settings.spot) {
-                                currentTile.feature = tile.featureTypes.taigaS;
+                                currentTile.setFeature(tile.featureTypes.taigaS);
                             }
                         }
                     }
                     else if (tempVal < settings.hot) {
                         // temperate biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.terrain = tile.tileTypes.grassland;
+                            currentTile.setTerrain(tile.tileTypes.grassland);
                             if (spotVal >= settings.spot) {
                                 if (drainVal >= settings.swamp) {
                                     if (moistVal < settings.forest[1]) {
-                                        currentTile.feature = tile.featureTypes.forestS;
+                                        currentTile.setFeature(tile.featureTypes.forestS);
                                     }
                                     else if (moistVal < settings.forest[2]) {
-                                        currentTile.feature = tile.featureTypes.forestM;
+                                        currentTile.setFeature(tile.featureTypes.forestM);
                                     }
                                     else {
-                                        currentTile.feature = tile.featureTypes.forestL;
+                                        currentTile.setFeature(tile.featureTypes.forestL);
                                     }
                                 }
                                 else {
-                                    currentTile.terrain = tile.tileTypes.swamp;
+                                    currentTile.setTerrain(tile.tileTypes.swamp);
                                 }
                             }
                         }
                         else if (moistVal >= settings.desert) {
-                            currentTile.terrain = tile.tileTypes.grassland;
+                            currentTile.setTerrain(tile.tileTypes.grassland);
                             if (spotVal < settings.spot) {
-                                currentTile.feature = tile.featureTypes.forestS;
+                                currentTile.setFeature(tile.featureTypes.forestS);
                             }
                         }
                         else {
                             if (drainVal >= settings.sand) {
-                                currentTile.terrain = tile.tileTypes.desert;
+                                currentTile.setTerrain(tile.tileTypes.desert);
                             }
                             else {
-                                currentTile.terrain = tile.tileTypes.semiarid;
+                                currentTile.setTerrain(tile.tileTypes.semiarid);
                             }
                         }
                     }
                     else {
                         // tropical biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.terrain = tile.tileTypes.jungle;
-                            //currentTile.feature = tile.featureTypes.mountain;
+                            currentTile.setTerrain(tile.tileTypes.jungle);
+                            //currentTile.setFeature(tile.featureTypes.mountain);
                             // if (moistVal < settings.forest[1]) {
-                            //     currentTile.feature = tile.featureTypes.jungleS;
+                            //     currentTile.setFeature(tile.featureTypes.jungleS);
                             // }
                             // else if (moistVal < settings.forest[2]) {
-                            //     currentTile.feature = tile.featureTypes.jungleM;
+                            //     currentTile.setFeature(tile.featureTypes.jungleM);
                             // }
                             // else {
-                            //     currentTile.feature = tile.featureTypes.jungleL;
+                            //     currentTile.setFeature(tile.featureTypes.jungleL);
                             // }
                         }
                         else if (moistVal >= settings.desert) {
-                            currentTile.terrain = tile.tileTypes.savanna;
+                            currentTile.setTerrain(tile.tileTypes.savanna);
                             if (spotVal < settings.spot) {
-                                currentTile.terrain = tile.tileTypes.jungle;
+                                currentTile.setTerrain(tile.tileTypes.jungle);
                             }
                         }
                         else {
                             if (drainVal >= settings.sand) {
-                                currentTile.terrain = tile.tileTypes.desert;
+                                currentTile.setTerrain(tile.tileTypes.desert);
                             }
                             else {
-                                currentTile.terrain = tile.tileTypes.semiarid;
+                                currentTile.setTerrain(tile.tileTypes.semiarid);
                             }
                         }
                     }
@@ -210,7 +210,7 @@ define(['tile', 'map', 'noise'],
                 if (randTile.terrain == tile.tileTypes.ocean) {
                     continue;
                 }
-                randTile.feature = tile.featureTypes.mountain;
+                randTile.setFeature(tile.featureTypes.mountain);
                 let frontier = map.grid.getNeighboursById(randTile.id);
                 let newFrontier = [];
                 let targetSize = Math.floor(Math.random() * 150) + 100;
@@ -224,7 +224,7 @@ define(['tile', 'map', 'noise'],
                         if (frontier[f].feature !== tile.featureTypes.mountain &&
                             frontier[f].terrain !== tile.tileTypes.ocean &&
                             mtList.indexOf(frontier[f]) >= 0) {
-                            frontier[f].feature = tile.featureTypes.mountain;
+                            frontier[f].setFeature(tile.featureTypes.mountain);
                             totalSize++;
                             newFrontier.push.apply(newFrontier, map.grid.getNeighboursById(frontier[f].id));
                         }

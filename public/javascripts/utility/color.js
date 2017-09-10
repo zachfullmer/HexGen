@@ -4,8 +4,9 @@ define(function () {
         var hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
-    color.rgbToHex = function (r, g, b) {
-        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    color.rgbToHexInt = function (r, g, b) {
+        let hexString = componentToHex(Math.round(r)) + componentToHex(Math.round(g)) + componentToHex(Math.round(b));
+        return parseInt(hexString, 16);
     }
     return color;
 });

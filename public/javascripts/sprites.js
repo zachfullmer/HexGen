@@ -1,41 +1,26 @@
-define(['jquery', 'xml'],
-    function ($, xml) {
-        function addSpriteSheet(fileName) {
-            var deferred = $.Deferred();
-            var fileNameMinusExt = fileName.match(/(.+)\./)[1];
-            if ($('#' + fileNameMinusExt + 'SpriteSheet').length > 0) {
-                console.log('sprite sheet "' + fileName + '" already exists');
-                deferred.resolve();
-                return deferred.promise();
-            }
-            console.log('loading sprite sheet "' + fileName + '"');
-            var img = document.createElement('img');
-            img.src = 'images/' + fileName;
-            img.id = fileNameMinusExt + 'SpriteSheet';
-            img.classList.add('sprite-sheet');
-            document.body.appendChild(img);
-            img.onload = () => {
-                deferred.resolve();
-            }
-            return deferred.promise();
+define(['jquery', 'xml', 'pixi'],
+    function ($, xml, PIXI) {
+
+        function minusExt(fileName) {
+            return fileName.match(/(.+)\./)[1];
         }
 
-        function readFolder(folder, root = true) {
+        function readFolder(folder, baseTex, root = true) {
             var folderData = ['', { dir: {}, spr: {} }];
             folderData[0] = folder.getAttribute('name');
             var child = xml.getFirstChild(folder);
             while (child !== null) {
                 if (child.tagName == 'dir') {
-                    var subFolderData = readFolder(child, false);
+                    var subFolderData = readFolder(child, baseTex, false);
                     folderData[1]['dir'][subFolderData[0]] = subFolderData[1];
                 }
                 else if (child.tagName == 'spr') {
-                    folderData[1]['spr'][child.getAttribute('name')] = {
-                        x: parseInt(child.getAttribute('x')),
-                        y: parseInt(child.getAttribute('y')),
-                        w: parseInt(child.getAttribute('w')),
-                        h: parseInt(child.getAttribute('h'))
-                    };
+                    let pixiTex = folderData[1]['spr'][child.getAttribute('name')] = new PIXI.Texture(baseTex);
+                    pixiTex.frame = new PIXI.Rectangle(
+                        parseInt(child.getAttribute('x')),
+                        parseInt(child.getAttribute('y')),
+                        parseInt(child.getAttribute('w')),
+                        parseInt(child.getAttribute('h')));
                 }
                 child = xml.nextSibling(child);
             }
@@ -57,17 +42,15 @@ define(['jquery', 'xml'],
                 success: (xmlData) => {
                     var img = xml.get(xmlData, 'img')[0];
                     var fileName = img.getAttribute('name');
-                    var fileNameMinusExt = fileName.match(/(.+)\./)[1];
-                    addSpriteSheet(fileName)
-                        .then(() => {
-                            var folder = xml.get(img, 'definitions')[0];
-                            folder = xml.get(folder, 'dir')[0];
-                            spriteLists[fileNameMinusExt] = {
-                                sheet: $('#' + fileNameMinusExt + 'SpriteSheet')[0],
-                                sprites: readFolder(folder)
-                            };
-                            deferred.resolve();
-                        })
+                    var fileNameMinusExt = minusExt(fileName);
+                    var folder = xml.get(img, 'definitions')[0];
+                    folder = xml.get(folder, 'dir')[0];
+                    var baseTex = PIXI.loader.resources['images/' + fileName].texture.baseTexture;
+                    spriteLists[fileNameMinusExt] = {
+                        sheet: baseTex,
+                        sprites: readFolder(folder, baseTex)
+                    };
+                    deferred.resolve();
                 }
             });
 
@@ -172,43 +155,6 @@ define(['jquery', 'xml'],
                                         }
                                         cell = xml.nextSibling(cell);
                                     }
-                                    animObject.extents = extents;
-                                    var width = extents.x2 - extents.x1;
-                                    var height = extents.y2 - extents.y1;
-                                    var halfW = Math.floor(width / 2);
-                                    var halfH = Math.floor(height / 2);
-                                    var shiftX = 0, shiftY = 0;
-                                    for (let c in animObject.cells) {
-                                        for (let s in animObject.cells[c].sprites) {
-                                            let sprite = animObject.cells[c].sprites[s];
-                                            sprite.x -= Math.floor(sprite.spriteData.w / 2 - halfW);
-                                            sprite.y -= Math.floor(sprite.spriteData.h / 2 - halfH);
-                                            if (sprite.x < shiftX) shiftX = sprite.x;
-                                            if (sprite.y < shiftY) shiftY = sprite.y;
-                                        }
-                                    }
-                                    animObject.offset = { x: -halfW, y: -halfH };
-                                    if (shiftX < 0 || shiftY < 0) {
-                                        animObject.offset.x += shiftX, animObject.offset.y += shiftY;
-                                        for (let c in animObject.cells) {
-                                            for (let s in animObject.cells[c].sprites) {
-                                                let sprite = animObject.cells[c].sprites[s];
-                                                sprite.x -= shiftX;
-                                                sprite.y -= shiftY;
-                                            }
-                                        }
-                                    }
-                                    for (let c in animObject.cells) {
-                                        for (let s in animObject.cells[c].sprites) {
-                                            let sprite = animObject.cells[c].sprites[s];
-                                            if (sprite.flipH) {
-                                                sprite.x = -(sprite.x + sprite.spriteData.w);
-                                            }
-                                            if (sprite.flipV) {
-                                                sprite.y = -(sprite.y + sprite.spriteData.h);
-                                            }
-                                        }
-                                    }
                                     animListObject[anim.getAttribute('name')] = animObject;
                                 }
                                 anim = xml.nextSibling(anim);
@@ -223,7 +169,6 @@ define(['jquery', 'xml'],
 
         return {
             addAnimList: addAnimList,
-            addSpriteSheet: addSpriteSheet,
             addSpriteList: addSpriteList,
             animLists: animLists,
             getSprite: getSprite,

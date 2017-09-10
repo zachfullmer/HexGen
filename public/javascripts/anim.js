@@ -1,16 +1,21 @@
 
-define(['jquery', 'sprites'],
-    function ($, sprites) {
+define(['jquery', 'sprites', 'pixi'],
+    function ($, sprites, PIXI) {
         function Anim(animData) {
             var aData = animData;
             var frameProgress = 0;
             var currentCell = aData.cells[0];
             var currentCellIndex = 0;
             var img = aData.spriteList.sheet;
-            var animCanvas = document.createElement('canvas');
-            animCanvas.width = aData.extents.x2 - aData.extents.x1;
-            animCanvas.height = aData.extents.y2 - aData.extents.y1;
-            var animCtx = animCanvas.getContext('2d');
+            var sprites = [];
+            this.spriteContainer = new PIXI.Container();
+            for (let c in aData.cells) {
+                while (aData.cells[c].sprites.length > sprites.length) {
+                    let sprite = new PIXI.Sprite();
+                    sprites.push(sprite);
+                    this.spriteContainer.addChild(sprite);
+                }
+            }
             this.update = function (deltaTime) {
                 frameProgress += deltaTime;
                 while (frameProgress >= (currentCell.delay)) {
@@ -22,25 +27,15 @@ define(['jquery', 'sprites'],
                         currentCell = aData.cells[0];
                     }
                 }
-            };
-            this.renderFrame = function () {
-                animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
                 for (let s in currentCell.sprites) {
-                    var sprite = currentCell.sprites[s];
-                    var sd = sprite.spriteData;
-                    if (sprite.flipH || sprite.flipV) {
-                        animCtx.scale(sprite.flipH ? -1 : 1, sprite.flipV ? -1 : 1);
-                    }
-                    animCtx.drawImage(img, sd.x, sd.y, sd.w, sd.h, sprite.x, sprite.y, sd.w, sd.h);
-                    animCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    sprites[s].setTexture(currentCell.sprites[s].spriteData);
+                    sprites[s].position.set(currentCell.sprites[s].x, currentCell.sprites[s].y);
+                    sprites[s].anchor.set(Math.floor(sprites[s].width / 2) / sprites[s].width, Math.floor(sprites[s].height / 2) / sprites[s].height);
+                    sprites[s].visible = true;
                 }
-            };
-            this.draw = function (ctx, cam, x, y) {
-                ctx.drawImage(animCanvas, 0, 0, animCanvas.width, animCanvas.height,
-                    x + aData.offset.x - cam.pos.x,
-                    y + aData.offset.y - cam.pos.y,
-                    animCanvas.width,
-                    animCanvas.height);
+                for (let s = currentCell.sprites.length; s < sprites.length; s++) {
+                    sprites[s].visible = false;
+                }
             };
         }
         return {
