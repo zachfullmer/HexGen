@@ -25,12 +25,15 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
         var pixelRatio = devicePixelRatio;
         var zoom = 1.0;
         var canvasSize = { w: window.innerWidth * pixelRatio / zoom, h: window.innerHeight * pixelRatio / zoom };
+        function updateCanvasSize() {
+            canvasSize = { w: window.innerWidth * pixelRatio / zoom, h: window.innerHeight * pixelRatio / zoom };
+            renderer.resize(canvasSize.w, canvasSize.h);
+        }
         var renderer = PIXI.autoDetectRenderer(canvasSize.w, canvasSize.h);
         renderer.view.style.position = "absolute";
         renderer.view.style.display = "block";
         renderer.view.style.left = '0';
         renderer.view.style.top = '0';
-        renderer.autoResize = true;
         document.body.appendChild(renderer.view);
         var stage = new PIXI.Container();
         var camVelX = 0;
@@ -62,6 +65,14 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                                 gen.generateMap(hexMap);
                                 hexMap.renderMiniMap();
                             }
+                            if (event.key == 'z') {
+                                zoom += 0.1;
+                                updateCanvasSize();
+                            }
+                            if (event.key == 'x') {
+                                zoom -= 0.1;
+                                updateCanvasSize();
+                            }
                         });
                         $(window).keyup((event) => {
                             if (event.key == 'ArrowLeft' || event.key == 'a' || event.key == 'ArrowRight' || event.key == 'd') {
@@ -77,9 +88,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             tileWidthInPixels: 64,
                             tileHeightInPixels: 74,
                             tileSpriteSheet: $('#terrainSpriteSheet')[0],
-                            featureSpriteSheet: $('#featureSpriteSheet')[0],
-                            canvasWidthInPixels: canvasSize.w,
-                            canvasHeightInPixels: canvasSize.h,
+                            featureSpriteSheet: $('#featureSpriteSheet')[0]
                         });
                         window.addEventListener('mousemove', (event) => {
                             let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
@@ -132,7 +141,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             stage.x = -hexMap.screenPos.x;
                             stage.y = -hexMap.screenPos.y;
                             $('#camPos').text(hexMap.screenPos.x + ',' + hexMap.screenPos.y);
-                            hexMap.calcCamPos();
+                            hexMap.calcCamPos(renderer.view);
                             hexMap.updateScreenVisibility(true);
                             //
                             miniMapCtx.clearRect(0, 0, miniMapCanvas.width, miniMapCanvas.height);

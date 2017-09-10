@@ -146,8 +146,6 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             }
             var _mapWidthInPixels = (op.mapWidthInTiles + 0.5) * op.tileWidthInPixels;
             var _mapHeightInPixels = ((op.mapHeightInTiles - 1) * _tileAdvanceVertical) + op.tileHeightInPixels;
-            var _canvasWidthInPixels = op.canvasWidthInPixels;
-            var _canvasHeightInPixels = op.canvasHeightInPixels;
             Object.defineProperties(this, {
                 mapWidthInTiles: {
                     get: function () { return _mapWidthInTiles; }
@@ -169,12 +167,6 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                 },
                 mapHeightInPixels: {
                     get: function () { return _mapHeightInPixels; }
-                },
-                canvasWidthInPixels: {
-                    get: function () { return _canvasWidthInPixels; }
-                },
-                canvasHeightInPixels: {
-                    get: function () { return _canvasHeightInPixels; }
                 }
             });
             // this is where the minimap is drawn to
@@ -253,10 +245,10 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                     currentTile = iterator.next();
                 }
             }
-            this.calcCamPos = function () {
+            this.calcCamPos = function (canvas) {
                 _screenEnd = {
-                    x: (this.screenPos.x + this.canvasWidthInPixels),
-                    y: (this.screenPos.y + this.canvasHeightInPixels)
+                    x: (this.screenPos.x + canvas.width),
+                    y: (this.screenPos.y + canvas.height)
                 };
                 _tilePos = {
                     x: Math.max(0, Math.floor(this.screenPos.x / this.tileWidthInPixels)),
