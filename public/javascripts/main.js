@@ -60,7 +60,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             }
                             if (event.key == 'Enter') {
                                 gen.generateMap(hexMap);
-                                //hexMap.renderMiniMap();
+                                hexMap.renderMiniMap();
                             }
                         });
                         $(window).keyup((event) => {
@@ -81,7 +81,25 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             canvasWidthInPixels: canvasSize.w,
                             canvasHeightInPixels: canvasSize.h,
                         });
+                        window.addEventListener('mousemove', (event) => {
+                            let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
+                            let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
+                            let offset = map.axialToOffset(axial);
+                            let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
+                            let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
+                            let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
+                            $('#mousePos').text(axial.q + ',' + axial.r);
+                            $('#tileTerrain').text(terrain);
+                            $('#tileFeature').text(feature);
+                        });
                         gen.generateMap(hexMap);
+                        hexMap.renderMiniMap();
+                        let miniMapCanvas = $('#miniMap')[0];
+                        miniMapCanvas.width = hexMap.miniMapCanvas.width;
+                        miniMapCanvas.height = hexMap.miniMapCanvas.height;
+                        miniMapCanvas.style.width = miniMapCanvas.width + 'px';
+                        miniMapCanvas.style.height = miniMapCanvas.height + 'px';
+                        let miniMapCtx = miniMapCanvas.getContext('2d');
                         stage.addChild(hexMap.spriteContainer);
                         let anims = [];
                         for (let a = 0; a < 3000; a++) {
@@ -113,9 +131,12 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             hexMap.screenPos.y += camVelY;
                             stage.x = -hexMap.screenPos.x;
                             stage.y = -hexMap.screenPos.y;
+                            $('#camPos').text(hexMap.screenPos.x + ',' + hexMap.screenPos.y);
                             hexMap.calcCamPos();
                             hexMap.updateScreenVisibility(true);
                             //
+                            miniMapCtx.clearRect(0, 0, miniMapCanvas.width, miniMapCanvas.height);
+                            hexMap.drawMiniMap(miniMapCtx, 0, 0, miniMapCanvas.width, miniMapCanvas.height);
                             renderer.render(stage);
                             meter.tick();
                         };

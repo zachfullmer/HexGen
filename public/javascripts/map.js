@@ -58,6 +58,23 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             this.temperature = 0;
             this.moisture = 0;
             this.drainage = 0;
+            Object.defineProperties(this, {
+                colorHexInt: {
+                    get: () => {
+                        if (this.feature !== null) {
+                            return this.feature.colorHex;
+                        }
+                        else if (this.terrain !== null) {
+                            if (this.terrain.tinted !== undefined) {
+                                return this.terrainSprite.tint;
+                            }
+                            else {
+                                return this.terrain.colorHex;
+                            }
+                        }
+                    }
+                }
+            });
         }
         Tile.prototype.setTerrain = function (terrain) {
             this.terrain = terrain;
@@ -221,25 +238,8 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             var _tileEnd = {};
             this.renderMiniMapTile = function (sourceTile) {
                 var pos = this.grid.getPositionById(sourceTile.id);
-                if (sourceTile.terrain.tinted) {
-                    let gradValue = sourceTile[sourceTile.terrain.gradient.type];
-                    let keys = sourceTile.terrain.gradient.keys;
-                    // clamp the grad value inside the defined range
-                    gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
-                    gradValue -= keys[0].value;
-                    let gradColor = sourceTile.terrain.colorList[gradValue];
-                    this.miniMapCtx.fillStyle = color.rgbToHex(Math.round(gradColor.r), Math.round(gradColor.g), Math.round(gradColor.b));
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
-                }
-                else {
-                    if (sourceTile.feature === null) {
-                        this.miniMapCtx.fillStyle = sourceTile.terrain.colorHex;
-                    }
-                    else {
-                        this.miniMapCtx.fillStyle = sourceTile.feature.colorHex;
-                    }
-                    this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
-                }
+                this.miniMapCtx.fillStyle = color.hexIntToHexString(sourceTile.colorHexInt);
+                this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
             }
             this.renderMiniMapTileByCoord = function (x, y) {
                 var sourceTile = this.grid.getTileByCoords(x, y);
@@ -290,73 +290,9 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                     }
                 }
             }
-            // draw the terrain tiles to an external canvas
-            this.drawTiles = function (ctx, cam) {
-                // let halfW = Math.floor(this.tileWidthInPixels / 2);
-                // let halfH = Math.floor(this.tileHeightInPixels / 2);
-                // for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
-                //     for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
-                //         let sourceTile = this.grid.getTileByCoords(x, y);
-                //         let tilePos = this.pixelCoordsOfTile(x, y);
-                //         if (sourceTile.terrain.tinted) {
-                //             let gradValue = sourceTile[sourceTile.terrain.gradient.type];
-                //             let keys = sourceTile.terrain.gradient.keys;
-                //             // clamp the grad value inside the defined range
-                //             gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
-                //             gradValue -= keys[0].value;
-                //             let drawRect = {
-                //                 x: (tilePos.x - halfW - cam.pos.x) / cam.zoomFactor,
-                //                 y: (tilePos.y - halfH - cam.pos.y) / cam.zoomFactor,
-                //                 w: this.tileWidthInPixels / cam.zoomFactor,
-                //                 h: this.tileHeightInPixels / cam.zoomFactor
-                //             };
-                //             ctx.drawImage(sourceTile.terrain.gradCanvas,
-                //                 this.tileWidthInPixels * gradValue, 0, this.tileWidthInPixels, this.tileHeightInPixels,
-                //                 drawRect.x, drawRect.y, drawRect.w, drawRect.h);
-                //         }
-                //         else {
-                //             let terrainSprite = sourceTile.terrain.sprite;
-                //             let drawRect = {
-                //                 x: (tilePos.x - halfW - cam.pos.x) / cam.zoomFactor,
-                //                 y: (tilePos.y - halfH - cam.pos.y) / cam.zoomFactor,
-                //                 w: terrainSprite.w / cam.zoomFactor,
-                //                 h: terrainSprite.h / cam.zoomFactor
-                //             };
-                //             ctx.drawImage(this.tileSpriteSheet,
-                //                 terrainSprite.x, terrainSprite.y, terrainSprite.w, terrainSprite.h,
-                //                 drawRect.x, drawRect.y, drawRect.w, drawRect.h);
-                //         }
-                //     }
-                // }
-            }
-            // draw the map features to an external canvas
-            this.drawFeatures = function (ctx, cam) {
-                for (let y = cam.minVisibleHex.y; y <= cam.maxVisibleHex.y; y++) {
-                    for (let x = cam.minVisibleHex.x; x <= cam.maxVisibleHex.x; x++) {
-                        let sourceTile = this.grid.getTileByCoords(x, y);
-                        if (sourceTile.feature !== null) {
-                            let featureSprite = sourceTile.feature.full;
-                            let halfW = Math.floor(featureSprite.sprite.w / 2);
-                            let halfH = Math.floor(featureSprite.sprite.h / 2);
-                            let tilePos = this.pixelCoordsOfTile(x, y);
-                            let drawRect = {
-                                x: (tilePos.x - halfW + featureSprite.offsetX - cam.pos.x) / cam.zoomFactor,
-                                y: (tilePos.y - halfH + featureSprite.offsetY - cam.pos.y) / cam.zoomFactor,
-                                w: featureSprite.sprite.w / cam.zoomFactor,
-                                h: featureSprite.sprite.h / cam.zoomFactor
-                            };
-                            ctx.globalAlpha = sourceTile.featureOpacity;
-                            ctx.drawImage(featureSpriteSheet,
-                                featureSprite.sprite.x, featureSprite.sprite.y, featureSprite.sprite.w, featureSprite.sprite.h,
-                                drawRect.x, drawRect.y, drawRect.w, drawRect.h);
-                            ctx.globalAlpha = 1.0;
-                        }
-                    }
-                }
-            }
-            this.drawMiniMap = function (ctx, cam, destX, destY, destW, destH) {
-                let minPix = { x: Math.floor(cam.pos.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.pos.y / this.tileAdvanceVertical) * 2 };
-                let maxPix = { x: Math.floor(cam.end.x / this.tileWidthInPixels) * 2, y: Math.floor(cam.end.y / this.tileAdvanceVertical) * 2 };
+            this.drawMiniMap = function (ctx, destX, destY, destW, destH) {
+                let minPix = { x: Math.floor(this.screenPos.x / this.tileWidthInPixels) * 2, y: Math.floor(this.screenPos.y / this.tileAdvanceVertical) * 2 };
+                let maxPix = { x: Math.floor(_screenEnd.x / this.tileWidthInPixels) * 2, y: Math.floor(_screenEnd.y / this.tileAdvanceVertical) * 2 };
                 ctx.drawImage(this.miniMapCanvas, destX, destY, destW, destH);
                 ctx.strokeRect(minPix.x, minPix.y, maxPix.x - minPix.x, maxPix.y - minPix.y);
             }

@@ -130,18 +130,6 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                     for (let t in tileTypes) {
                         tileTypes[t].name = t;
                         tileTypes[t].sprite = sprites.getSprite('terrain', tileTypes[t].spriteName);
-
-                        // tinted: true,
-                        // gradient: {
-                        //     type: 'height',
-                        //     keys: [
-                        //         { value: 30, color: { r: 0, g: 42, b: 179 } },
-                        //         { value: 100, color: { r: 58, g: 146, b: 255 } }
-                        //     ]
-                        // }
-                        // if (tileTypes[t].tinted !== undefined) {
-                        //     tileTypes[t].tintedSprite = new tint.TintedSprite(sheet, tileTypes[t].sprite);
-                        // }
                         if (tileTypes[t].gradient !== undefined) {
                             let grad = tileTypes[t].gradient;
                             let indexOffset = grad.keys[0].value;

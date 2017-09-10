@@ -1,8 +1,6 @@
 extends layout
 
 block content
-  canvas#drawSurface
-  img.sprite-sheet(src="images/terrain.png")
   div#infoBox
     canvas#miniMap
     table
@@ -22,5 +20,3 @@ block content
         td feature:
         td
           #tileFeature
-    label High DPI Scaling
-      input(type="checkbox" id="dpiCheck")

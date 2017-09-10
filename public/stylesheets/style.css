@@ -14,6 +14,7 @@ img.sprite-sheet {
 }
 
 div#infoBox {
+    z-index: 2;
     position: fixed;
     color: #fff;
     top: 0;
