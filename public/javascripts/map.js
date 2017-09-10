@@ -264,7 +264,7 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                 };
                 _tileEnd = {
                     x: Math.min(this.mapWidthInTiles - 1, Math.ceil(_screenEnd.x / this.tileWidthInPixels) + 1),
-                    y: Math.min(this.mapHeightInTiles - 1, Math.ceil(_screenEnd.y / this.tileAdvanceVertical))
+                    y: Math.min(this.mapHeightInTiles - 1, Math.ceil(_screenEnd.y / this.tileAdvanceVertical) + 1)
                 };
                 _groupPos = {
                     x: Math.max(0, Math.floor(this.screenPos.x / _groupPixelSize.w)),
