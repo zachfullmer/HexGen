@@ -1,13 +1,15 @@
 
 define(['jquery', 'sprites', 'pixi'],
     function ($, sprites, PIXI) {
-        function Anim(animData) {
+        function Anim(animData, onFinish = null) {
             var aData = animData;
             var frameProgress = 0;
             var currentCell = aData.cells[0];
             var currentCellIndex = 0;
+            var completedLoops = 0;
             var img = aData.spriteList.sheet;
             var sprites = [];
+            this.onFinish = onFinish;
             this.spriteContainer = new PIXI.Container();
             for (let c in aData.cells) {
                 while (aData.cells[c].sprites.length > sprites.length) {
@@ -25,6 +27,11 @@ define(['jquery', 'sprites', 'pixi'],
                     if (currentCellIndex >= aData.cells.length) {
                         currentCellIndex = 0;
                         currentCell = aData.cells[0];
+                        completedLoops++;
+                        if (aData.loops > 0 && completedLoops >= aData.loops && this.onFinish) {
+                            this.onFinish(this);
+                            this.onFinish = null;
+                        }
                     }
                 }
                 for (let s in currentCell.sprites) {
