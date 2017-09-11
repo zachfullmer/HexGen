@@ -1,6 +1,6 @@
 
 define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
-    function ($, sprites, tint, gradient, color) {
+    function ($, SPRITES, TINT, GRADIENT, COLOR) {
         var featureTypes = {
             mountain: {
                 name: 'Mountain',
@@ -124,12 +124,12 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
         };
         function loadTiles() {
             var deferred = $.Deferred();
-            sprites.addSpriteList('terrain.sprites')
+            SPRITES.addSpriteList('terrain.sprites')
                 .then(() => {
                     var sheet = PIXI.loader.resources['images/terrain.png'].texture.baseTexture;
                     for (let t in tileTypes) {
                         tileTypes[t].name = t;
-                        tileTypes[t].sprite = sprites.getSprite('terrain', tileTypes[t].spriteName);
+                        tileTypes[t].sprite = SPRITES.getSprite('terrain', tileTypes[t].spriteName);
                         if (tileTypes[t].gradient !== undefined) {
                             let grad = tileTypes[t].gradient;
                             let indexOffset = grad.keys[0].value;
@@ -138,12 +138,12 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                                 colors.push(grad.keys[k].color);
                                 keys.push(grad.keys[k].value - indexOffset);
                             }
-                            tileTypes[t].colorList = gradient.createGradientMap(colors, keys);
+                            tileTypes[t].colorList = GRADIENT.createGradientMap(colors, keys);
                         }
                         if (tileTypes[t].color === undefined) {
                             throw Error('tile "' + tileTypes[t].name + '" has no color attribute');
                         }
-                        tileTypes[t].colorHex = color.rgbToHexInt(
+                        tileTypes[t].colorHex = COLOR.rgbToHexInt(
                             tileTypes[t].color.r,
                             tileTypes[t].color.g,
                             tileTypes[t].color.b);
@@ -155,15 +155,15 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
         }
         function loadFeatures() {
             var deferred = $.Deferred();
-            sprites.addSpriteList('feature.sprites')
+            SPRITES.addSpriteList('feature.sprites')
                 .then(() => {
                     for (let f in featureTypes) {
                         featureTypes[f].name = f;
-                        featureTypes[f].full.sprite = sprites.getSprite('feature', featureTypes[f].full.spriteName);
+                        featureTypes[f].full.sprite = SPRITES.getSprite('feature', featureTypes[f].full.spriteName);
                         if (featureTypes[f].color === undefined) {
                             throw Error('feature "' + featureTypes[f].name + '" has no color attribute');
                         }
-                        featureTypes[f].colorHex = color.rgbToHexInt(
+                        featureTypes[f].colorHex = COLOR.rgbToHexInt(
                             featureTypes[f].color.r,
                             featureTypes[f].color.g,
                             featureTypes[f].color.b);

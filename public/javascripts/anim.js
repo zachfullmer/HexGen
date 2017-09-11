@@ -1,6 +1,6 @@
 
 define(['jquery', 'sprites', 'pixi'],
-    function ($, sprites, PIXI) {
+    function ($, SPRITES, PIXI) {
         function Anim(animData, onFinish = null) {
             var aData = animData;
             var frameProgress = 0;

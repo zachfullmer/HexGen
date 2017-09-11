@@ -1,6 +1,6 @@
 
 define(['tile', 'map', 'noise'],
-    function (tile, map, noise) {
+    function (TILE, MAP, NOISE) {
         var settings = {
             seaLevel: 100,
             heightMap: { octaves: 5.0, persistence: 0.5, scale: 0.01 },
@@ -21,37 +21,37 @@ define(['tile', 'map', 'noise'],
             mountNum: 10.0
         };
         function generateMap(map) {
-            var heightMap = new noise.FastSimplexNoise({
+            var heightMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
                 octaves: settings.heightMap.octaves,
                 persistence: settings.heightMap.persistence
             });
-            var tempMap = new noise.FastSimplexNoise({
+            var tempMap = new NOISE.FastSimplexNoise({
                 min: 96,
                 max: 160,
                 octaves: settings.tempMap.octaves,
                 persistence: settings.tempMap.persistence
             });
-            var drainMap = new noise.FastSimplexNoise({
+            var drainMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
                 octaves: settings.drainMap.octaves,
                 persistence: settings.drainMap.persistence
             });
-            var moistMap = new noise.FastSimplexNoise({
+            var moistMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
                 octaves: settings.moistMap.octaves,
                 persistence: settings.moistMap.persistence
             });
-            var spotMap = new noise.FastSimplexNoise({
+            var spotMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
                 octaves: settings.spotMap.octaves,
                 persistence: settings.spotMap.persistence
             });
-            var mountMap = new noise.FastSimplexNoise({
+            var mountMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
                 octaves: settings.mountMap.octaves,
@@ -85,95 +85,95 @@ define(['tile', 'map', 'noise'],
                     mtList.push(currentTile);
                 }
                 if (heightVal < settings.seaLevel) {
-                    currentTile.setTerrain(tile.tileTypes.ocean);
+                    currentTile.setTerrain(TILE.tileTypes.ocean);
                 }
                 else {
                     if (tempVal < settings.snow) {
                         // snoooow
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.setTerrain(tile.tileTypes.tundraSnow);
+                            currentTile.setTerrain(TILE.tileTypes.tundraSnow);
                             if (spotVal >= settings.spot) {
                                 if (moistVal < settings.forest[1]) {
-                                    currentTile.setFeature(tile.featureTypes.taigaSnowS);
+                                    currentTile.setFeature(TILE.featureTypes.taigaSnowS);
                                 }
                                 else if (moistVal < settings.forest[2]) {
-                                    currentTile.setFeature(tile.featureTypes.taigaSnowM);
+                                    currentTile.setFeature(TILE.featureTypes.taigaSnowM);
                                 }
                                 else {
-                                    currentTile.setFeature(tile.featureTypes.taigaSnowL);
+                                    currentTile.setFeature(TILE.featureTypes.taigaSnowL);
                                 }
                             }
                         }
                         else {
-                            currentTile.setTerrain(tile.tileTypes.tundraSnow);
+                            currentTile.setTerrain(TILE.tileTypes.tundraSnow);
                             if (spotVal < settings.spot) {
-                                currentTile.setFeature(tile.featureTypes.taigaSnowS);
+                                currentTile.setFeature(TILE.featureTypes.taigaSnowS);
                             }
                         }
                     }
                     else if (tempVal < settings.cold) {
                         // cold biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.setTerrain(tile.tileTypes.tundra);
+                            currentTile.setTerrain(TILE.tileTypes.tundra);
                             if (spotVal >= settings.spot) {
                                 if (moistVal < settings.forest[1]) {
-                                    currentTile.setFeature(tile.featureTypes.taigaS);
+                                    currentTile.setFeature(TILE.featureTypes.taigaS);
                                 }
                                 else if (moistVal < settings.forest[2]) {
-                                    currentTile.setFeature(tile.featureTypes.taigaM);
+                                    currentTile.setFeature(TILE.featureTypes.taigaM);
                                 }
                                 else {
-                                    currentTile.setFeature(tile.featureTypes.taigaL);
+                                    currentTile.setFeature(TILE.featureTypes.taigaL);
                                 }
                             }
                         }
                         else {
-                            currentTile.setTerrain(tile.tileTypes.tundra);
+                            currentTile.setTerrain(TILE.tileTypes.tundra);
                             if (spotVal < settings.spot) {
-                                currentTile.setFeature(tile.featureTypes.taigaS);
+                                currentTile.setFeature(TILE.featureTypes.taigaS);
                             }
                         }
                     }
                     else if (tempVal < settings.hot) {
                         // temperate biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.setTerrain(tile.tileTypes.grassland);
+                            currentTile.setTerrain(TILE.tileTypes.grassland);
                             if (spotVal >= settings.spot) {
                                 if (drainVal >= settings.swamp) {
                                     if (moistVal < settings.forest[1]) {
-                                        currentTile.setFeature(tile.featureTypes.forestS);
+                                        currentTile.setFeature(TILE.featureTypes.forestS);
                                     }
                                     else if (moistVal < settings.forest[2]) {
-                                        currentTile.setFeature(tile.featureTypes.forestM);
+                                        currentTile.setFeature(TILE.featureTypes.forestM);
                                     }
                                     else {
-                                        currentTile.setFeature(tile.featureTypes.forestL);
+                                        currentTile.setFeature(TILE.featureTypes.forestL);
                                     }
                                 }
                                 else {
-                                    currentTile.setTerrain(tile.tileTypes.swamp);
+                                    currentTile.setTerrain(TILE.tileTypes.swamp);
                                 }
                             }
                         }
                         else if (moistVal >= settings.desert) {
-                            currentTile.setTerrain(tile.tileTypes.grassland);
+                            currentTile.setTerrain(TILE.tileTypes.grassland);
                             if (spotVal < settings.spot) {
-                                currentTile.setFeature(tile.featureTypes.forestS);
+                                currentTile.setFeature(TILE.featureTypes.forestS);
                             }
                         }
                         else {
                             if (drainVal >= settings.sand) {
-                                currentTile.setTerrain(tile.tileTypes.desert);
+                                currentTile.setTerrain(TILE.tileTypes.desert);
                             }
                             else {
-                                currentTile.setTerrain(tile.tileTypes.semiarid);
+                                currentTile.setTerrain(TILE.tileTypes.semiarid);
                             }
                         }
                     }
                     else {
                         // tropical biomes
                         if (moistVal >= settings.forest[0]) {
-                            currentTile.setTerrain(tile.tileTypes.jungle);
+                            currentTile.setTerrain(TILE.tileTypes.jungle);
                             //currentTile.setFeature(tile.featureTypes.mountain);
                             // if (moistVal < settings.forest[1]) {
                             //     currentTile.setFeature(tile.featureTypes.jungleS);
@@ -186,17 +186,17 @@ define(['tile', 'map', 'noise'],
                             // }
                         }
                         else if (moistVal >= settings.desert) {
-                            currentTile.setTerrain(tile.tileTypes.savanna);
+                            currentTile.setTerrain(TILE.tileTypes.savanna);
                             if (spotVal < settings.spot) {
-                                currentTile.setTerrain(tile.tileTypes.jungle);
+                                currentTile.setTerrain(TILE.tileTypes.jungle);
                             }
                         }
                         else {
                             if (drainVal >= settings.sand) {
-                                currentTile.setTerrain(tile.tileTypes.desert);
+                                currentTile.setTerrain(TILE.tileTypes.desert);
                             }
                             else {
-                                currentTile.setTerrain(tile.tileTypes.semiarid);
+                                currentTile.setTerrain(TILE.tileTypes.semiarid);
                             }
                         }
                     }
@@ -207,10 +207,10 @@ define(['tile', 'map', 'noise'],
             for (let a = 0; a < 8; a++) {
                 let randIndex = Math.floor(Math.random() * mtList.length);
                 let randTile = mtList[randIndex];
-                if (randTile.terrain == tile.tileTypes.ocean) {
+                if (randTile.terrain == TILE.tileTypes.ocean) {
                     continue;
                 }
-                randTile.setFeature(tile.featureTypes.mountain);
+                randTile.setFeature(TILE.featureTypes.mountain);
                 let frontier = map.grid.getNeighboursById(randTile.id);
                 let newFrontier = [];
                 let targetSize = Math.floor(Math.random() * 150) + 100;
@@ -221,10 +221,10 @@ define(['tile', 'map', 'noise'],
                             newFrontier = [];
                             break;
                         }
-                        if (frontier[f].feature !== tile.featureTypes.mountain &&
-                            frontier[f].terrain !== tile.tileTypes.ocean &&
+                        if (frontier[f].feature !== TILE.featureTypes.mountain &&
+                            frontier[f].terrain !== TILE.tileTypes.ocean &&
                             mtList.indexOf(frontier[f]) >= 0) {
-                            frontier[f].setFeature(tile.featureTypes.mountain);
+                            frontier[f].setFeature(TILE.featureTypes.mountain);
                             totalSize++;
                             newFrontier.push.apply(newFrontier, map.grid.getNeighboursById(frontier[f].id));
                         }

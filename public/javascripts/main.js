@@ -14,7 +14,7 @@ requirejs.config({
 });
 
 requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gradient', 'scaling', 'pixi'],
-    function ($, map, tile, xml, sprites, anim, gen, tint, gradient, scaling, PIXI) {
+    function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI) {
         var meter = new FPSMeter();
         // initialize rendering stuff
         var type = "WebGL"
@@ -42,7 +42,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
         PIXI.loader
             .add(['images/terrain.png', 'images/feature.png', 'images/monsters.png', 'images/castle.png'])
             .load(function () {
-                $.when(tile.loadTiles(), tile.loadFeatures(), sprites.addAnimList('castle.anim'))
+                $.when(TILE.loadTiles(), TILE.loadFeatures(), SPRITES.addAnimList('castle.anim'))
                     .done(() => {
                         var camSpeed = 15;
                         $(window).keydown((event) => {
@@ -62,7 +62,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                                 camVelY = camSpeed;
                             }
                             if (event.key == 'Enter') {
-                                gen.generateMap(hexMap);
+                                GEN.generateMap(hexMap);
                                 hexMap.renderMiniMap();
                             }
                             if (event.key == 'z') {
@@ -82,7 +82,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                                 camVelY = 0;
                             }
                         });
-                        let hexMap = new map.HexMap({
+                        let hexMap = new MAP.HexMap({
                             mapWidthInTiles: 128,
                             mapHeightInTiles: 128,
                             tileWidthInPixels: 64,
@@ -93,7 +93,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         $(window).on('mousemove', (event) => {
                             let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
                             let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
-                            let offset = map.axialToOffset(axial);
+                            let offset = MAP.axialToOffset(axial);
                             let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
                             let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
                             let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
@@ -104,7 +104,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         $(window).on('resize', (event) => {
                             updateCanvasSize();
                         });
-                        gen.generateMap(hexMap);
+                        GEN.generateMap(hexMap);
                         hexMap.renderMiniMap();
                         let miniMapCanvas = $('#miniMap')[0];
                         miniMapCanvas.width = hexMap.miniMapCanvas.width;
@@ -120,7 +120,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                                 y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
                             }
                             let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
-                            let currentAnim = new anim.Anim(sprites.animLists.castle['castle']);
+                            let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']); let currentAnim = new anim.Anim(sprites.animLists.castle['castle']);
                             currentTile.addSprite(currentAnim.spriteContainer);
                             //stage.addChild(currentAnim.spriteContainer);
                             anims.push(currentAnim);

@@ -1,6 +1,6 @@
 
 define(['hex', 'tile', 'sprites', 'color', 'pixi'],
-    function (HexGrid, tile, sprites, color, PIXI) {
+    function (HexGrid, TILE, SPRITES, COLOR, PIXI) {
         function cubeRound(cube) {
             var rx = Math.round(cube.x)
             var ry = Math.round(cube.y)
@@ -89,7 +89,7 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                 gradValue = Math.min(keys[keys.length - 1].value, Math.max(gradValue, keys[0].value));
                 gradValue -= keys[0].value;
                 let tileColor = this.terrain.colorList[gradValue];
-                this.terrainSprite.tint = color.rgbToHexInt(tileColor.r, tileColor.g, tileColor.b);
+                this.terrainSprite.tint = COLOR.rgbToHexInt(tileColor.r, tileColor.g, tileColor.b);
             }
             else {
                 this.terrainSprite.tint = 0xFFFFFF;
@@ -214,7 +214,7 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             for (let y = 0; y < this.mapHeightInTiles; y++) {
                 for (let x = 0; x < this.mapWidthInTiles; x++) {
                     let currentTile = this.grid.getTileByCoords(x, y);
-                    currentTile.setTerrain(tile.tileTypes.blank);
+                    currentTile.setTerrain(TILE.tileTypes.blank);
                     let terrainSprite = currentTile.terrainSprite;
                     let spriteContainer = currentTile.spriteContainer;
                     let xPos = this.tileWidthInPixels * x + (y % 2 ? (this.tileWidthInPixels / 2) : 0);
@@ -233,7 +233,7 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             var _tileEnd = {};
             this.renderMiniMapTile = function (sourceTile) {
                 var pos = this.grid.getPositionById(sourceTile.id);
-                this.miniMapCtx.fillStyle = color.hexIntToHexString(sourceTile.colorHexInt);
+                this.miniMapCtx.fillStyle = COLOR.hexIntToHexString(sourceTile.colorHexInt);
                 this.miniMapCtx.fillRect(pos.x * 2, pos.y * 2, 2, 2);
             }
             this.renderMiniMapTileByCoord = function (x, y) {

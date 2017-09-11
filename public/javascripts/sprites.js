@@ -1,5 +1,5 @@
 define(['jquery', 'xml', 'pixi'],
-    function ($, xml, PIXI) {
+    function ($, XML, PIXI) {
 
         function minusExt(fileName) {
             return fileName.match(/(.+)\./)[1];
@@ -8,7 +8,7 @@ define(['jquery', 'xml', 'pixi'],
         function readFolder(folder, baseTex, root = true) {
             var folderData = ['', { dir: {}, spr: {} }];
             folderData[0] = folder.getAttribute('name');
-            var child = xml.getFirstChild(folder);
+            var child = XML.getFirstChild(folder);
             while (child !== null) {
                 if (child.tagName == 'dir') {
                     var subFolderData = readFolder(child, baseTex, false);
@@ -22,7 +22,7 @@ define(['jquery', 'xml', 'pixi'],
                         parseInt(child.getAttribute('w')),
                         parseInt(child.getAttribute('h')));
                 }
-                child = xml.nextSibling(child);
+                child = XML.nextSibling(child);
             }
             if (root) {
                 return folderData[1];
@@ -40,11 +40,11 @@ define(['jquery', 'xml', 'pixi'],
                 url: 'data/' + xmlFilename,
                 dataType: 'xml',
                 success: (xmlData) => {
-                    var img = xml.get(xmlData, 'img')[0];
+                    var img = XML.get(xmlData, 'img')[0];
                     var fileName = img.getAttribute('name');
                     var fileNameMinusExt = minusExt(fileName);
-                    var folder = xml.get(img, 'definitions')[0];
-                    folder = xml.get(folder, 'dir')[0];
+                    var folder = XML.get(img, 'definitions')[0];
+                    folder = XML.get(folder, 'dir')[0];
                     var baseTex = PIXI.loader.resources['images/' + fileName].texture.baseTexture;
                     spriteLists[fileNameMinusExt] = {
                         sheet: baseTex,
@@ -87,14 +87,14 @@ define(['jquery', 'xml', 'pixi'],
                 url: 'data/' + xmlFileName,
                 dataType: 'xml',
                 success: (xmlData) => {
-                    var anims = xml.get(xmlData, 'animations')[0];
+                    var anims = XML.get(xmlData, 'animations')[0];
                     var fileName = anims.getAttribute('spriteSheet');
                     var fileNameMinusExt = fileName.match(/(.+)\./)[1];
                     addSpriteList(fileName)
                         .then(() => {
                             var spriteList = spriteLists[fileNameMinusExt];
                             var animListObject = {};
-                            var anim = xml.getFirstChild(anims);
+                            var anim = XML.getFirstChild(anims);
                             // loop through animations
                             while (anim !== null) {
                                 if (anim.tagName == 'anim') {
@@ -106,7 +106,7 @@ define(['jquery', 'xml', 'pixi'],
                                     };
                                     // loop through animation cells
                                     var extents = { x1: 0, y1: 0, x2: 0, y2: 0 };
-                                    var cell = xml.getFirstChild(anim);
+                                    var cell = XML.getFirstChild(anim);
                                     while (cell !== null) {
                                         if (cell.tagName == 'cell') {
                                             var cellObject = {
@@ -114,7 +114,7 @@ define(['jquery', 'xml', 'pixi'],
                                                 sprites: []
                                             };
                                             // loop through cell sprites
-                                            var spr = xml.getFirstChild(cell);
+                                            var spr = XML.getFirstChild(cell);
                                             while (spr !== null) {
                                                 if (spr.tagName == 'spr') {
                                                     var sprObject = {
@@ -149,15 +149,15 @@ define(['jquery', 'xml', 'pixi'],
                                                     if (down > extents.y2) extents.y2 = down;
                                                     cellObject.sprites.push(sprObject);
                                                 }
-                                                spr = xml.nextSibling(spr);
+                                                spr = XML.nextSibling(spr);
                                             }
                                             animObject.cells.push(cellObject);
                                         }
-                                        cell = xml.nextSibling(cell);
+                                        cell = XML.nextSibling(cell);
                                     }
                                     animListObject[anim.getAttribute('name')] = animObject;
                                 }
-                                anim = xml.nextSibling(anim);
+                                anim = XML.nextSibling(anim);
                             }
                             animLists[fileNameMinusExt] = animListObject;
                             deferred.resolve();
