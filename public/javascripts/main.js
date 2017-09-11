@@ -90,7 +90,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             tileSpriteSheet: $('#terrainSpriteSheet')[0],
                             featureSpriteSheet: $('#featureSpriteSheet')[0]
                         });
-                        window.addEventListener('mousemove', (event) => {
+                        $(window).on('mousemove', (event) => {
                             let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
                             let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
                             let offset = map.axialToOffset(axial);
@@ -100,6 +100,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             $('#mousePos').text(axial.q + ',' + axial.r);
                             $('#tileTerrain').text(terrain);
                             $('#tileFeature').text(feature);
+                        });
+                        $(window).on('resize', (event) => {
+                            updateCanvasSize();
                         });
                         gen.generateMap(hexMap);
                         hexMap.renderMiniMap();
