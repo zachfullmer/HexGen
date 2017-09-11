@@ -98,6 +98,9 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
         Tile.prototype.addSprite = function (tSprite) {
             this.spriteContainer.addChild(tSprite);
         }
+        Tile.prototype.removeSprite = function (tSprite) {
+            this.spriteContainer.removeChild(tSprite);
+        }
         Tile.prototype.setFeature = function (feature) {
             this.feature = feature;
             if (feature === null) {
