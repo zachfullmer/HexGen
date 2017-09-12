@@ -139,10 +139,10 @@ define(['jquery', 'xml', 'pixi'],
                                                     if (sprObject.spriteData === undefined) {
                                                         throw Error('animation "' + xmlFileName + '" couldn\'t find sprite "' + path + '" in sprite list "' + fileName + '"');
                                                     }
-                                                    var left = Math.floor(sprObject.x - (sprObject.spriteData.w / 2));
-                                                    var right = Math.floor(sprObject.x + (sprObject.spriteData.w / 2));
-                                                    var up = Math.floor(sprObject.y - (sprObject.spriteData.h / 2));
-                                                    var down = Math.floor(sprObject.y + (sprObject.spriteData.h / 2));
+                                                    var left = Math.floor(sprObject.x - (sprObject.spriteData.orig.width / 2));
+                                                    var right = Math.floor(sprObject.x + (sprObject.spriteData.orig.width / 2));
+                                                    var up = Math.floor(sprObject.y - (sprObject.spriteData.orig.height / 2));
+                                                    var down = Math.floor(sprObject.y + (sprObject.spriteData.orig.height / 2));
                                                     if (left < extents.x1) extents.x1 = left;
                                                     if (right > extents.x2) extents.x2 = right;
                                                     if (up < extents.y1) extents.y1 = up;
@@ -155,6 +155,7 @@ define(['jquery', 'xml', 'pixi'],
                                         }
                                         cell = XML.nextSibling(cell);
                                     }
+                                    animObject.extents = extents;
                                     animListObject[anim.getAttribute('name')] = animObject;
                                 }
                                 anim = XML.nextSibling(anim);

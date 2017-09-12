@@ -13,7 +13,8 @@ requirejs.config({
     }
 });
 
-requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gradient', 'scaling', 'pixi'],
+requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
+    'gradient', 'scaling', 'pixi'],
     function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI) {
         var meter = new FPSMeter();
         // initialize rendering stuff
@@ -113,17 +114,15 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                         miniMapCanvas.style.height = miniMapCanvas.height + 'px';
                         let miniMapCtx = miniMapCanvas.getContext('2d');
                         stage.addChild(hexMap.spriteContainer);
-                        let anims = [];
+                        let castleAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
                         for (let a = 0; a < 3000; a++) {
                             let tilePos = {
                                 x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
                                 y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
                             }
                             let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
-                            let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']); let currentAnim = new anim.Anim(sprites.animLists.castle['castle']);
-                            currentTile.addSprite(currentAnim.spriteContainer);
+                            currentTile.addSprite(castleAnim.createSprite());
                             //stage.addChild(currentAnim.spriteContainer);
-                            anims.push(currentAnim);
                         }
                         var oldTime = null;
                         function render(time) {
@@ -135,9 +134,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint', 'gr
                             var deltaTime = time - oldTime;
                             oldTime = time;
                             //
-                            for (let a in anims) {
-                                anims[a].update(deltaTime);
-                            }
+                            castleAnim.update(deltaTime, renderer);
                             hexMap.updateScreenVisibility(false);
                             hexMap.screenPos.x += camVelX;
                             hexMap.screenPos.y += camVelY;
