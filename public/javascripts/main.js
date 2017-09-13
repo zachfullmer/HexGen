@@ -114,15 +114,16 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         miniMapCanvas.style.height = miniMapCanvas.height + 'px';
                         let miniMapCtx = miniMapCanvas.getContext('2d');
                         stage.addChild(hexMap.spriteContainer);
-                        let castleAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
+                        let anims = [];
                         for (let a = 0; a < 3000; a++) {
                             let tilePos = {
                                 x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
                                 y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
                             }
                             let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
-                            currentTile.addSprite(castleAnim.createSprite());
-                            //stage.addChild(currentAnim.spriteContainer);
+                            let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
+                            currentTile.addSprite(currentAnim.spriteContainer);
+                            anims.push(currentAnim);
                         }
                         var oldTime = null;
                         function render(time) {
@@ -134,7 +135,10 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                             var deltaTime = time - oldTime;
                             oldTime = time;
                             //
-                            castleAnim.update(deltaTime, renderer);
+                            //castleAnim.update(deltaTime, renderer);
+                            for (let a in anims) {
+                                anims[a].update(deltaTime);
+                            }
                             hexMap.updateScreenVisibility(false);
                             hexMap.screenPos.x += camVelX;
                             hexMap.screenPos.y += camVelY;
