@@ -27,7 +27,7 @@ define(['jquery'],
                 this.windowDom.remove();
             });
             // content inside window
-            this.domContent = $('<div>', {
+            this.contentDom = $('<div>', {
                 class: 'gui-window-content'
             }).appendTo(this.windowDom)[0];
             Object.defineProperties(this, {
