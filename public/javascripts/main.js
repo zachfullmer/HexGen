@@ -31,6 +31,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
             renderer.resize(canvasSize.w, canvasSize.h);
         }
         var renderer = PIXI.autoDetectRenderer(canvasSize.w, canvasSize.h);
+        renderer.view.id = 'mapWindow';
         renderer.view.style.position = "absolute";
         renderer.view.style.display = "block";
         renderer.view.style.left = '0';

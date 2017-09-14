@@ -28,7 +28,7 @@ div#infoBox {
     opacity: 1.0;
 }
 
-canvas {
+canvas#mapWindow {
     width: 100vw;
     height: 100vh;
 }
