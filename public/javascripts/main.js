@@ -44,117 +44,118 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
         PIXI.loader
             .add(['images/terrain.png', 'images/feature.png', 'images/monsters.png', 'images/castle.png'])
             .load(function () {
-                $.when(TILE.loadTiles(), TILE.loadFeatures(), SPRITES.addAnimList('castle.anim'))
-                    .done(() => {
-                        var camSpeed = 15;
-                        $(window).keydown((event) => {
-                            if (event.repeat) {
-                                return;
-                            }
-                            if (event.key == 'ArrowLeft' || event.key == 'a') {
-                                camVelX = -camSpeed;
-                            }
-                            if (event.key == 'ArrowRight' || event.key == 'd') {
-                                camVelX = camSpeed;
-                            }
-                            if (event.key == 'ArrowUp' || event.key == 'w') {
-                                camVelY = -camSpeed;
-                            }
-                            if (event.key == 'ArrowDown' || event.key == 's') {
-                                camVelY = camSpeed;
-                            }
-                            if (event.key == 'Enter') {
-                                GEN.generateMap(hexMap);
-                                hexMap.renderMiniMap();
-                            }
-                            if (event.key == 'z') {
-                                zoom += 0.1;
-                                updateCanvasSize();
-                            }
-                            if (event.key == 'x') {
-                                zoom -= 0.1;
-                                updateCanvasSize();
-                            }
-                        });
-                        $(window).keyup((event) => {
-                            if (event.key == 'ArrowLeft' || event.key == 'a' || event.key == 'ArrowRight' || event.key == 'd') {
-                                camVelX = 0;
-                            }
-                            if (event.key == 'ArrowUp' || event.key == 'w' || event.key == 'ArrowDown' || event.key == 's') {
-                                camVelY = 0;
-                            }
-                        });
-                        let hexMap = new MAP.HexMap({
-                            mapWidthInTiles: 128,
-                            mapHeightInTiles: 128,
-                            tileWidthInPixels: 64,
-                            tileHeightInPixels: 74,
-                            tileSpriteSheet: $('#terrainSpriteSheet')[0],
-                            featureSpriteSheet: $('#featureSpriteSheet')[0]
-                        });
-                        $(window).on('mousemove', (event) => {
-                            let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
-                            let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
-                            let offset = MAP.axialToOffset(axial);
-                            let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
-                            let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
-                            let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
-                            $('#mousePos').text(axial.q + ',' + axial.r);
-                            $('#tileTerrain').text(terrain);
-                            $('#tileFeature').text(feature);
-                        });
-                        $(window).on('resize', (event) => {
-                            updateCanvasSize();
-                        });
-                        GEN.generateMap(hexMap);
-                        hexMap.renderMiniMap();
-                        let miniMapCanvas = $('#miniMap')[0];
-                        miniMapCanvas.width = hexMap.miniMapCanvas.width;
-                        miniMapCanvas.height = hexMap.miniMapCanvas.height;
-                        miniMapCanvas.style.width = miniMapCanvas.width + 'px';
-                        miniMapCanvas.style.height = miniMapCanvas.height + 'px';
-                        let miniMapCtx = miniMapCanvas.getContext('2d');
-                        stage.addChild(hexMap.spriteContainer);
-                        let anims = [];
-                        for (let a = 0; a < 3000; a++) {
-                            let tilePos = {
-                                x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
-                                y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
-                            }
-                            let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
-                            let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
-                            currentTile.addSprite(currentAnim.spriteContainer);
-                            anims.push(currentAnim);
+                SPRITES.loadGraphics().then(() => {
+                    TILE.loadTiles();
+                    TILE.loadFeatures();
+                    var camSpeed = 15;
+                    $(window).keydown((event) => {
+                        if (event.repeat) {
+                            return;
                         }
-                        var oldTime = null;
-                        function render(time) {
-                            meter.tickStart();
-                            requestAnimationFrame(render);
-                            if (oldTime === null) {
-                                oldTime = time;
-                            }
-                            var deltaTime = time - oldTime;
-                            oldTime = time;
-                            //
-                            //castleAnim.update(deltaTime, renderer);
-                            for (let a in anims) {
-                                anims[a].update(deltaTime);
-                            }
-                            hexMap.updateScreenVisibility(false);
-                            hexMap.screenPos.x += camVelX;
-                            hexMap.screenPos.y += camVelY;
-                            stage.x = -hexMap.screenPos.x;
-                            stage.y = -hexMap.screenPos.y;
-                            $('#camPos').text(hexMap.screenPos.x + ',' + hexMap.screenPos.y);
-                            hexMap.calcCamPos(renderer.view);
-                            hexMap.updateScreenVisibility(true);
-                            //
-                            miniMapCtx.clearRect(0, 0, miniMapCanvas.width, miniMapCanvas.height);
-                            hexMap.drawMiniMap(miniMapCtx, 0, 0, miniMapCanvas.width, miniMapCanvas.height);
-                            renderer.render(stage);
-                            meter.tick();
-                        };
-                        requestAnimationFrame(render);
+                        if (event.key == 'ArrowLeft' || event.key == 'a') {
+                            camVelX = -camSpeed;
+                        }
+                        if (event.key == 'ArrowRight' || event.key == 'd') {
+                            camVelX = camSpeed;
+                        }
+                        if (event.key == 'ArrowUp' || event.key == 'w') {
+                            camVelY = -camSpeed;
+                        }
+                        if (event.key == 'ArrowDown' || event.key == 's') {
+                            camVelY = camSpeed;
+                        }
+                        if (event.key == 'Enter') {
+                            GEN.generateMap(hexMap);
+                            hexMap.renderMiniMap();
+                        }
+                        if (event.key == 'z') {
+                            zoom += 0.1;
+                            updateCanvasSize();
+                        }
+                        if (event.key == 'x') {
+                            zoom -= 0.1;
+                            updateCanvasSize();
+                        }
                     });
+                    $(window).keyup((event) => {
+                        if (event.key == 'ArrowLeft' || event.key == 'a' || event.key == 'ArrowRight' || event.key == 'd') {
+                            camVelX = 0;
+                        }
+                        if (event.key == 'ArrowUp' || event.key == 'w' || event.key == 'ArrowDown' || event.key == 's') {
+                            camVelY = 0;
+                        }
+                    });
+                    let hexMap = new MAP.HexMap({
+                        mapWidthInTiles: 128,
+                        mapHeightInTiles: 128,
+                        tileWidthInPixels: 64,
+                        tileHeightInPixels: 74,
+                        tileSpriteSheet: $('#terrainSpriteSheet')[0],
+                        featureSpriteSheet: $('#featureSpriteSheet')[0]
+                    });
+                    $(window).on('mousemove', (event) => {
+                        let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
+                        let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
+                        let offset = MAP.axialToOffset(axial);
+                        let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
+                        let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
+                        let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
+                        $('#mousePos').text(axial.q + ',' + axial.r);
+                        $('#tileTerrain').text(terrain);
+                        $('#tileFeature').text(feature);
+                    });
+                    $(window).on('resize', (event) => {
+                        updateCanvasSize();
+                    });
+                    GEN.generateMap(hexMap);
+                    hexMap.renderMiniMap();
+                    let miniMapCanvas = $('#miniMap')[0];
+                    miniMapCanvas.width = hexMap.miniMapCanvas.width;
+                    miniMapCanvas.height = hexMap.miniMapCanvas.height;
+                    miniMapCanvas.style.width = miniMapCanvas.width + 'px';
+                    miniMapCanvas.style.height = miniMapCanvas.height + 'px';
+                    let miniMapCtx = miniMapCanvas.getContext('2d');
+                    stage.addChild(hexMap.spriteContainer);
+                    let anims = [];
+                    for (let a = 0; a < 3000; a++) {
+                        let tilePos = {
+                            x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
+                            y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
+                        }
+                        let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
+                        let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
+                        currentTile.addSprite(currentAnim.spriteContainer);
+                        anims.push(currentAnim);
+                    }
+                    var oldTime = null;
+                    function render(time) {
+                        meter.tickStart();
+                        requestAnimationFrame(render);
+                        if (oldTime === null) {
+                            oldTime = time;
+                        }
+                        var deltaTime = time - oldTime;
+                        oldTime = time;
+                        //
+                        //castleAnim.update(deltaTime, renderer);
+                        for (let a in anims) {
+                            anims[a].update(deltaTime);
+                        }
+                        hexMap.updateScreenVisibility(false);
+                        hexMap.screenPos.x += camVelX;
+                        hexMap.screenPos.y += camVelY;
+                        stage.x = -hexMap.screenPos.x;
+                        stage.y = -hexMap.screenPos.y;
+                        $('#camPos').text(hexMap.screenPos.x + ',' + hexMap.screenPos.y);
+                        hexMap.calcCamPos(renderer.view);
+                        hexMap.updateScreenVisibility(true);
+                        //
+                        miniMapCtx.clearRect(0, 0, miniMapCanvas.width, miniMapCanvas.height);
+                        hexMap.drawMiniMap(miniMapCtx, 0, 0, miniMapCanvas.width, miniMapCanvas.height);
+                        renderer.render(stage);
+                        meter.tick();
+                    };
+                    requestAnimationFrame(render);
+                });
             });
     });

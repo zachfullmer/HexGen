@@ -167,12 +167,43 @@ define(['jquery', 'xml', 'pixi'],
             });
             return deferred.promise();
         }
+        function loadGraphics() {
+            var deferred = $.Deferred();
+            $.ajax({
+                type: 'GET',
+                url: 'data/graphics.json',
+                dataType: 'json',
+                success: (jsonData) => {
+                    let promises = [];
+                    for (let f in jsonData) {
+                        let ext = jsonData[f].match(/.+(\.\w+)$/);
+                        if (ext === null) {
+                            throw Error('invalid file listed in graphics.json; must be .sprites or .anim file');
+                        }
+                        if (ext[1] === '.sprites') {
+                            promises.push(addSpriteList(ext[0]));
+                        }
+                        else if (ext[1] === '.anim') {
+                            promises.push(addAnimList(ext[0]));
+                        }
+                        else {
+                            throw Error('invalid file "' + ext[0] + '" listed in graphics.json; must be .sprites or .anim file');
+                        }
+                    }
+                    $.when(...promises).done(() => {
+                        deferred.resolve();
+                    });
+                }
+            });
+            return deferred.promise();
+        }
 
         return {
             addAnimList: addAnimList,
             addSpriteList: addSpriteList,
             animLists: animLists,
             getSprite: getSprite,
+            loadGraphics: loadGraphics,
             spriteLists: spriteLists
         }
     }
