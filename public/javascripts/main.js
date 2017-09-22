@@ -9,13 +9,39 @@ requirejs.config({
         color: 'utility/color',
         coords: 'utility/coords',
         scaling: 'utility/scaling',
-        pixi: 'utility/pixi.min'
+        pixi: 'utility/pixi.min',
+        seedrandom: 'utility/seedrandom'
     }
 });
+
+const seedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!';
+
+function genSeed() {
+    let seed = '';
+    for (let s = 0; s < 8; s++) {
+        seed = seed.concat(seedChars[Math.floor(Math.random() * seedChars.length)]);
+    }
+    return seed;
+}
+
+function seedIsValid(seed) {
+    if (typeof seed !== 'string' ||
+        seed.length !== 8) {
+        return false;
+    }
+    for (let s = 0; s < seed.length; s++) {
+        if (seedChars.indexOf(seed[s]) < 0) {
+            return false;
+        }
+    }
+    return true;
+}
 
 requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
     'gradient', 'scaling', 'pixi'],
     function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI) {
+        var seed = genSeed();
+        $('#mapSeed').val(seed);
         var meter = new FPSMeter();
         // initialize rendering stuff
         var type = "WebGL"
@@ -48,6 +74,22 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     TILE.loadTiles();
                     TILE.loadFeatures();
                     var camSpeed = 15;
+                    $('#genButton').click((event) => {
+                        seed = genSeed();
+                        $('#mapSeed').val(seed);
+                        GEN.generateMap(hexMap, seed);
+                        hexMap.renderMiniMap();
+                    });
+                    $('#genSeedButton').click((event) => {
+                        if (seedIsValid($('#mapSeed').val())) {
+                            seed = $('#mapSeed').val();
+                            GEN.generateMap(hexMap, seed);
+                            hexMap.renderMiniMap();
+                        }
+                        else {
+                            console.log('invalid seed');
+                        }
+                    });
                     $(window).keydown((event) => {
                         if (event.repeat) {
                             return;
@@ -65,7 +107,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                             camVelY = camSpeed;
                         }
                         if (event.key == 'Enter') {
-                            GEN.generateMap(hexMap);
+                            seed = genSeed();
+                            $('#mapSeed').val(seed);
+                            GEN.generateMap(hexMap, seed);
                             hexMap.renderMiniMap();
                         }
                         if (event.key == 'z') {
@@ -107,7 +151,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     $(window).on('resize', (event) => {
                         updateCanvasSize();
                     });
-                    GEN.generateMap(hexMap);
+                    GEN.generateMap(hexMap, seed);
                     hexMap.renderMiniMap();
                     let miniMapCanvas = $('#miniMap')[0];
                     miniMapCanvas.width = hexMap.miniMapCanvas.width;
@@ -117,7 +161,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     let miniMapCtx = miniMapCanvas.getContext('2d');
                     stage.addChild(hexMap.spriteContainer);
                     let anims = [];
-                    for (let a = 0; a < 3000; a++) {
+                    for (let a = 0; a < 0; a++) {
                         let tilePos = {
                             x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
                             y: Math.floor(Math.random() * hexMap.mapHeightInTiles)

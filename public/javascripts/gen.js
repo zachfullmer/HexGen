@@ -1,6 +1,6 @@
 
-define(['tile', 'map', 'noise'],
-    function (TILE, MAP, NOISE) {
+define(['tile', 'map', 'noise', 'seedrandom'],
+    function (TILE, MAP, NOISE, SEEDRANDOM) {
         var settings = {
             seaLevel: 100,
             heightMap: { octaves: 5.0, persistence: 0.5, scale: 0.01 },
@@ -20,7 +20,8 @@ define(['tile', 'map', 'noise'],
             hot: 182.0,
             mountNum: 10.0
         };
-        function generateMap(map) {
+        function generateMap(map, seed) {
+            Math.seedrandom(seed);
             var heightMap = new NOISE.FastSimplexNoise({
                 min: 0,
                 max: 255,
@@ -233,6 +234,7 @@ define(['tile', 'map', 'noise'],
                     newFrontier = [];
                 }
             }
+            Math.seedrandom();
         }
         return {
             generateMap: generateMap
