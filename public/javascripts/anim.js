@@ -37,6 +37,8 @@ define(['jquery', 'sprites', 'pixi'],
                     sprites[s].setTexture(currentCell.sprites[s].spriteData);
                     sprites[s].position.set(currentCell.sprites[s].x, currentCell.sprites[s].y);
                     sprites[s].anchor.set(Math.floor(sprites[s].width / 2) / sprites[s].width, Math.floor(sprites[s].height / 2) / sprites[s].height);
+                    sprites[s].scale.x = currentCell.sprites[s].flipH ? -1 : 1;
+                    sprites[s].scale.y = currentCell.sprites[s].flipV ? -1 : 1;
                     sprites[s].visible = true;
                 }
                 for (let s = currentCell.sprites.length; s < sprites.length; s++) {
