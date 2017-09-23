@@ -9,8 +9,10 @@ requirejs.config({
         color: 'utility/color',
         coords: 'utility/coords',
         scaling: 'utility/scaling',
+        window: 'utility/window',
         pixi: 'utility/pixi.min',
-        seedrandom: 'utility/seedrandom'
+        seedrandom: 'utility/seedrandom',
+        priority: 'utility/priority-queue.min'
     }
 });
 
@@ -38,9 +40,9 @@ function seedIsValid(seed) {
 }
 
 requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
-    'gradient', 'scaling', 'pixi'],
-    function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI) {
-        var seed = genSeed();
+    'gradient', 'scaling', 'pixi', 'site', 'unit'],
+    function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI, SITE, UNIT) {
+        var seed = '12345678';
         $('#mapSeed').val(seed);
         var meter = new FPSMeter();
         // initialize rendering stuff
@@ -66,6 +68,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
         var stage = new PIXI.Container();
         var camVelX = 0;
         var camVelY = 0;
+        var testUnit = null;
+        var testSite = null;
         // when sprite loading is done, load map and begin drawing
         PIXI.loader
             .add(['images/terrain.png', 'images/feature.png', 'images/monsters.png', 'images/castle.png'])
@@ -73,6 +77,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                 SPRITES.loadGraphics().then(() => {
                     TILE.loadTiles();
                     TILE.loadFeatures();
+                    SITE.loadSites();
+                    UNIT.loadUnits();
                     var camSpeed = 15;
                     $('#genButton').click((event) => {
                         seed = genSeed();
@@ -120,6 +126,12 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                             zoom -= 0.1;
                             updateCanvasSize();
                         }
+                        if (event.key == '.') {
+                            let nextMove = testUnit.path.shift();
+                            if (nextMove !== undefined) {
+                                hexMap.moveUnit(testUnit, nextMove.x, nextMove.y);
+                            }
+                        }
                     });
                     $(window).keyup((event) => {
                         if (event.key == 'ArrowLeft' || event.key == 'a' || event.key == 'ArrowRight' || event.key == 'd') {
@@ -137,6 +149,8 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         tileSpriteSheet: $('#terrainSpriteSheet')[0],
                         featureSpriteSheet: $('#featureSpriteSheet')[0]
                     });
+                    hexMap.screenPos.x = 4485;
+                    hexMap.screenPos.y = 2955;
                     $(window).on('mousemove', (event) => {
                         let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
                         let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
@@ -144,9 +158,16 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         let mouseTile = hexMap.grid.getTileByCoords(offset.x, offset.y);
                         let terrain = mouseTile && mouseTile.terrain ? mouseTile.terrain.name : 'none';
                         let feature = mouseTile && mouseTile.feature ? mouseTile.feature.name : 'none';
-                        $('#mousePos').text(axial.q + ',' + axial.r);
+                        $('#mousePos').text(offset.x + ',' + offset.y + ' (axial: ' + axial.q + ',' + axial.r + ')');
                         $('#tileTerrain').text(terrain);
                         $('#tileFeature').text(feature);
+                    });
+                    $(window).on('click', (event) => {
+                        let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
+                        let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
+                        let offset = MAP.axialToOffset(axial);
+                        let path = hexMap.findPath(testUnit.pos, offset, testUnit);
+                        testUnit.path = path;
                     });
                     $(window).on('resize', (event) => {
                         updateCanvasSize();
@@ -161,16 +182,14 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     let miniMapCtx = miniMapCanvas.getContext('2d');
                     stage.addChild(hexMap.spriteContainer);
                     let anims = [];
-                    for (let a = 0; a < 0; a++) {
-                        let tilePos = {
-                            x: Math.floor(Math.random() * hexMap.mapWidthInTiles),
-                            y: Math.floor(Math.random() * hexMap.mapHeightInTiles)
-                        }
-                        let currentTile = hexMap.grid.getTileByCoords(tilePos.x, tilePos.y);
-                        let currentAnim = new ANIM.Anim(SPRITES.animLists.castle['castle']);
-                        currentTile.addSprite(currentAnim.spriteContainer);
-                        anims.push(currentAnim);
-                    }
+                    //
+                    testUnit = new UNIT.Unit(UNIT.get('army'));
+                    anims.push(testUnit.anim);
+                    hexMap.addUnit(testUnit, 77, 60);
+                    testSite = new SITE.Site(SITE.get('humanCity'));
+                    anims.push(testSite.anim);
+                    hexMap.addSite(testSite, 78, 60);
+                    //
                     var oldTime = null;
                     function render(time) {
                         meter.tickStart();

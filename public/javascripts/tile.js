@@ -58,6 +58,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
                 spriteName: '/tiles/full/ocean',
                 color: { r: 255, g: 255, b: 255 },
                 tinted: true,
+                water: true,
                 gradient: {
                     type: 'height',
                     keys: [

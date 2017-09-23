@@ -1,6 +1,6 @@
 
-define(['hex', 'tile', 'sprites', 'color', 'pixi'],
-    function (HexGrid, TILE, SPRITES, COLOR, PIXI) {
+define(['hex', 'tile', 'sprites', 'color', 'pixi', 'priority'],
+    function (HexGrid, TILE, SPRITES, COLOR, PIXI, PriorityQueue) {
         function cubeRound(cube) {
             var rx = Math.round(cube.x)
             var ry = Math.round(cube.y)
@@ -20,9 +20,10 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             return { x: rx, y: ry, z: rz };
         }
         function oddrToCube(x, y) {
-            var xCube = x - (y - (y & 1)) / 2;
-            var zCube = y;
-            var yCube = -x - z;
+            var xCube = y - (x - (x & 1)) / 2;
+            var zCube = x;
+            var yCube = -xCube - zCube;
+            return { x: xCube, y: yCube, z: zCube };
         }
         function axialToCube(axial) {
             var x = axial.q;
@@ -45,10 +46,22 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
             var r = offset.y;
             return { q: q, r: r };
         }
+        function offsetHexDistance(offsetA, offsetB) {
+            let a = oddrToCube(offsetA.x, offsetA.y);
+            let b = oddrToCube(offsetB.x, offsetB.y);
+            return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.z - b.z));
+        }
+        function axialHexDistance(a, b) {
+            return (Math.abs(a.q - b.q)
+                + Math.abs(a.q + a.r - b.q - b.r)
+                + Math.abs(a.r - b.r)) / 2;
+        }
         function Tile() {
             this.id = 0;
             this.terrain = null;
             this.feature = null;
+            this.site = null;
+            this.units = [];
             this.spriteContainer = new PIXI.Container();
             this.terrainSprite = new PIXI.Sprite();
             this.featureSprite = new PIXI.Sprite();
@@ -114,6 +127,18 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                     Math.floor(this.featureSprite.height / 2 - this.feature.full.offsetY) / this.featureSprite.height);
             }
         }
+        Tile.prototype.setSite = function (site) {
+            this.site = site;
+            this.addSprite(site.sprite);
+        }
+        Tile.prototype.addUnit = function (unit) {
+            this.units.push(unit);
+            this.addSprite(unit.sprite);
+        }
+        Tile.prototype.removeUnit = function (unit) {
+            this.units.splice(this.units.indexOf(unit), 1);
+            this.removeSprite(unit.sprite);
+        }
         var TileFactory = function () {
             var _id = 0;
             return {
@@ -172,6 +197,7 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                     get: function () { return _mapHeightInPixels; }
                 }
             });
+            this.units = [];
             // this is where the minimap is drawn to
             this.miniMapCanvas = document.createElement('canvas');
             this.miniMapCanvas.width = this.mapWidthInTiles * 2;
@@ -304,6 +330,74 @@ define(['hex', 'tile', 'sprites', 'color', 'pixi'],
                 cube = cubeRound(cube);
                 let result = cubeToAxial(cube);
                 return result;
+            }
+            this.addSite = function (site, x, y) {
+                let tile = this.grid.getTileByCoords(x, y);
+                tile.setSite(site);
+                site.pos = { x: x, y: y };
+            }
+            this.addUnit = function (unit, x, y) {
+                let tile = this.grid.getTileByCoords(x, y);
+                tile.addUnit(unit);
+                unit.pos = { x: x, y: y };
+            }
+            this.moveUnit = function (unit, x, y) {
+                let startTile = this.grid.getTileByCoords(unit.pos.x, unit.pos.y);
+                let endTile = this.grid.getTileByCoords(x, y);
+                startTile.removeUnit(unit);
+                endTile.addUnit(unit);
+                unit.pos = { x: x, y: y };
+            }
+            function comp(a, b) {
+                return a.pr - b.pr;
+            }
+            function moveCost(current, next) {
+                return 1;
+            }
+            // A* implementation
+            this.findPath = function (start, goal, unit) {
+                let frontier = new PriorityQueue({ comparator: comp });
+                let startId = this.grid.getTileByCoords(start.x, start.y).id;
+                let goalId = this.grid.getTileByCoords(goal.x, goal.y).id;
+                frontier.queue({ id: startId, pr: 0 });
+                let cameFrom = {};
+                let costSoFar = {};
+                cameFrom[startId] = null;
+                costSoFar[startId] = 0;
+                let current = null;
+                while (frontier.length) {
+                    current = frontier.dequeue();
+                    let currentTile = this.grid.getTileById(current.id);
+                    if (current.id === goalId) {
+                        break;
+                    }
+                    let nList = this.grid.getNeighboursById(current.id);
+                    for (let n in nList) {
+                        let next = nList[n];
+                        let nextTile = this.grid.getTileById(next.id);
+                        if (!unit.canPass(nextTile)) {
+                            continue;
+                        }
+                        let cost = costSoFar[current.id] + moveCost(currentTile, nextTile);
+                        if (costSoFar[next.id] === undefined || cost < costSoFar[next.id]) {
+                            costSoFar[next.id] = cost;
+                            let nextCoords = this.grid.getCoordsById(next.id);
+                            let priority = cost + offsetHexDistance(nextCoords, goal);
+                            frontier.queue({ id: next.id, pr: priority });
+                            cameFrom[next.id] = current.id;
+                        }
+                    }
+                }
+                if (current.id !== goalId) {
+                    return [];
+                }
+                let cId = current.id;
+                let path = [];
+                while (cameFrom[cId] !== null) {
+                    path.unshift(this.grid.getCoordsById(cId));
+                    cId = cameFrom[cId];
+                }
+                return path;
             }
         }
         return {
