@@ -1,5 +1,7 @@
-define(['jquery', 'xml', 'pixi'],
-    function ($, XML, PIXI) {
+define(['jquery', 'xml', 'pixi', 'anim'],
+    function ($, XML, PIXI, ANIM) {
+
+        var SPRITES = {};
 
         function minusExt(fileName) {
             return fileName.match(/(.+)\./)[1];
@@ -30,9 +32,9 @@ define(['jquery', 'xml', 'pixi'],
             return folderData;
         }
 
-        var spriteLists = {};
+        SPRITES.spriteLists = {};
 
-        function addSpriteList(xmlFilename) {
+        SPRITES.addSpriteList = function (xmlFilename) {
             var deferred = $.Deferred();
 
             $.ajax({
@@ -46,7 +48,7 @@ define(['jquery', 'xml', 'pixi'],
                     var folder = XML.get(img, 'definitions')[0];
                     folder = XML.get(folder, 'dir')[0];
                     var baseTex = PIXI.loader.resources['images/' + fileName].texture.baseTexture;
-                    spriteLists[fileNameMinusExt] = {
+                    SPRITES.spriteLists[fileNameMinusExt] = {
                         sheet: baseTex,
                         sprites: readFolder(folder, baseTex)
                     };
@@ -57,13 +59,13 @@ define(['jquery', 'xml', 'pixi'],
             return deferred.promise();
         }
 
-        function getSprite(spriteListName, path) {
-            if (spriteLists[spriteListName] === undefined) {
+        SPRITES.getSpriteTexture = function (spriteListName, path) {
+            if (SPRITES.spriteLists[spriteListName] === undefined) {
                 throw Error('" couldn\'t find sprite list "' + spriteListName + '"');
             }
             let splitPath = path.split(/\/+/);
             splitPath.splice(0, 1);
-            let spriteData = spriteLists[spriteListName].sprites;
+            let spriteData = SPRITES.spriteLists[spriteListName].sprites;
             for (let s in splitPath) {
                 if (s >= splitPath.length - 1) {
                     spriteData = spriteData.spr[splitPath[s]];
@@ -78,9 +80,9 @@ define(['jquery', 'xml', 'pixi'],
             return spriteData;
         }
 
-        var animLists = {};
+        SPRITES.animLists = {};
 
-        function addAnimList(xmlFileName) {
+        SPRITES.addAnimList = function (xmlFileName) {
             var deferred = $.Deferred();
             $.ajax({
                 type: 'GET',
@@ -90,9 +92,9 @@ define(['jquery', 'xml', 'pixi'],
                     var anims = XML.get(xmlData, 'animations')[0];
                     var fileName = anims.getAttribute('spriteSheet');
                     var fileNameMinusExt = fileName.match(/(.+)\./)[1];
-                    addSpriteList(fileName)
+                    SPRITES.addSpriteList(fileName)
                         .then(() => {
-                            var spriteList = spriteLists[fileNameMinusExt];
+                            var spriteList = SPRITES.spriteLists[fileNameMinusExt];
                             var animListObject = {};
                             var anim = XML.getFirstChild(anims);
                             // loop through animations
@@ -127,7 +129,7 @@ define(['jquery', 'xml', 'pixi'],
                                                     let path = spr.getAttribute('name');
                                                     let splitPath = path.split(/\/+/);
                                                     splitPath.splice(0, 1);
-                                                    sprObject.spriteData = spriteLists[fileNameMinusExt].sprites;
+                                                    sprObject.spriteData = SPRITES.spriteLists[fileNameMinusExt].sprites;
                                                     for (let s in splitPath) {
                                                         if (s >= splitPath.length - 1) {
                                                             sprObject.spriteData = sprObject.spriteData.spr[splitPath[s]];
@@ -160,14 +162,14 @@ define(['jquery', 'xml', 'pixi'],
                                 }
                                 anim = XML.nextSibling(anim);
                             }
-                            animLists[fileNameMinusExt] = animListObject;
+                            SPRITES.animLists[fileNameMinusExt] = animListObject;
                             deferred.resolve();
                         });
                 }
             });
             return deferred.promise();
         }
-        function loadGraphics() {
+        SPRITES.loadGraphics = function () {
             var deferred = $.Deferred();
             $.ajax({
                 type: 'GET',
@@ -181,10 +183,10 @@ define(['jquery', 'xml', 'pixi'],
                             throw Error('invalid file listed in graphics.json; must be .sprites or .anim file');
                         }
                         if (ext[1] === '.sprites') {
-                            promises.push(addSpriteList(ext[0]));
+                            promises.push(SPRITES.addSpriteList(ext[0]));
                         }
                         else if (ext[1] === '.anim') {
-                            promises.push(addAnimList(ext[0]));
+                            promises.push(SPRITES.addAnimList(ext[0]));
                         }
                         else {
                             throw Error('invalid file "' + ext[0] + '" listed in graphics.json; must be .sprites or .anim file');
@@ -198,13 +200,38 @@ define(['jquery', 'xml', 'pixi'],
             return deferred.promise();
         }
 
-        return {
-            addAnimList: addAnimList,
-            addSpriteList: addSpriteList,
-            animLists: animLists,
-            getSprite: getSprite,
-            loadGraphics: loadGraphics,
-            spriteLists: spriteLists
+        SPRITES.getEntityTypeGraphics = function (entityType) {
+            if (entityType.animListName && entityType.animName) {
+                entityType.anim = SPRITES.animLists[entityType.animListName][entityType.animName];
+                if (entityType.anim === undefined) {
+                    throw Error('could not find animation "' + entityType.animName + '" in anim file "' + entityType.animListName + '"');
+                }
+            }
+            else if (entityType.spriteListName && entityType.spritePath) {
+                entityType.spriteTexture = SPRITES.getSpriteTexture(entityType.spriteListName, entityType.spritePath);
+            }
+            else {
+                throw Error('entity does not have any animations or sprites specified');
+            }
         }
+
+        SPRITES.createEntityGraphics = function (entity) {
+            if (entity.type.anim) {
+                entity.anim = new ANIM.Anim(entity.type.anim);
+                entity.sprite = entity.anim.spriteContainer;
+            }
+            else if (entity.type.spriteTexture) {
+                entity.sprite = new PIXI.Sprite();
+                entity.sprite.setTexture(entity.type.spriteTexture);
+                entity.sprite.anchor.set(
+                    Math.floor(entity.sprite.width / 2) / entity.sprite.width,
+                    Math.floor(entity.sprite.height / 2) / entity.sprite.height);
+            }
+            else {
+                throw Error('entity type "' + entity.type.name + '" has no animations or sprites defined');
+            }
+        }
+
+        return SPRITES;
     }
 );

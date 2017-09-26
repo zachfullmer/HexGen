@@ -5,19 +5,17 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
         UNIT.unitTypes = {
             army: {
                 name: 'Army',
-                animListName: 'monsters',
-                animName: 'Bowser'
+                // animListName: 'monsters',
+                // animName: 'Bowser',
+                spriteListName: 'feature',
+                spritePath: '/plants/pine/l1'
             }
         };
         UNIT.loadUnits = function () {
             for (let u in UNIT.unitTypes) {
-                if (UNIT.unitTypes[u].animListName && UNIT.unitTypes[u].animName) {
-                    UNIT.unitTypes[u].anim = SPRITES.animLists[UNIT.unitTypes[u].animListName][UNIT.unitTypes[u].animName];
-                    if (UNIT.unitTypes[u].anim === undefined) {
-                        throw Error('could not find animation "' + UNIT.unitTypes[u].animName + '" in anim file "' + UNIT.unitTypes[u].animListName + '"');
-                    }
-                }
+                SPRITES.getEntityTypeGraphics(UNIT.unitTypes[u]);
             }
+            console.log(SPRITES.spriteLists);
             console.log('units loaded');
         }
         UNIT.get = function (typeName) {
@@ -32,10 +30,8 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
             this.path = [];
             this.anim = null;
             this.sprite = null;
-            if (this.type.anim) {
-                this.anim = new ANIM.Anim(this.type.anim);
-                this.sprite = this.anim.spriteContainer;
-            }
+            console.log(this);
+            SPRITES.createEntityGraphics(this);
             this.canPass = function (tile) {
                 if (!this.type.canPassWater && tile.terrain.water) {
                     return false;

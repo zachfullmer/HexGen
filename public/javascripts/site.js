@@ -11,12 +11,7 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
         };
         SITE.loadSites = function () {
             for (let s in SITE.siteTypes) {
-                if (SITE.siteTypes[s].animListName && SITE.siteTypes[s].animName) {
-                    SITE.siteTypes[s].anim = SPRITES.animLists[SITE.siteTypes[s].animListName][SITE.siteTypes[s].animName];
-                    if (SITE.siteTypes[s].anim === undefined) {
-                        throw Error('could not find animation "' + SITE.siteTypes[s].animName + '" in anim file "' + SITE.siteTypes[s].animListName + '"');
-                    }
-                }
+                SPRITES.getEntityTypeGraphics(SITE.siteTypes[s]);
             }
             console.log('sites loaded');
         }
@@ -32,10 +27,7 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
             this.pos = { x: 0, y: 0 };
             this.anim = null;
             this.sprite = null;
-            if (this.type.anim) {
-                this.anim = new ANIM.Anim(this.type.anim);
-                this.sprite = this.anim.spriteContainer;
-            }
+            SPRITES.createEntityGraphics(this);
         };
         return SITE;
     }

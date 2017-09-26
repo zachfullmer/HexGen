@@ -127,7 +127,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
             var sheet = PIXI.loader.resources['images/terrain.png'].texture.baseTexture;
             for (let t in tileTypes) {
                 tileTypes[t].name = t;
-                tileTypes[t].sprite = SPRITES.getSprite('terrain', tileTypes[t].spriteName);
+                tileTypes[t].sprite = SPRITES.getSpriteTexture('terrain', tileTypes[t].spriteName);
                 if (tileTypes[t].gradient !== undefined) {
                     let grad = tileTypes[t].gradient;
                     let indexOffset = grad.keys[0].value;
@@ -151,7 +151,7 @@ define(['jquery', 'sprites', 'tint', 'gradient', 'color'],
         function loadFeatures() {
             for (let f in featureTypes) {
                 featureTypes[f].name = f;
-                featureTypes[f].full.sprite = SPRITES.getSprite('feature', featureTypes[f].full.spriteName);
+                featureTypes[f].full.sprite = SPRITES.getSpriteTexture('feature', featureTypes[f].full.spriteName);
                 if (featureTypes[f].color === undefined) {
                     throw Error('feature "' + featureTypes[f].name + '" has no color attribute');
                 }
