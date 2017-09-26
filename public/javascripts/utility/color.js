@@ -5,9 +5,19 @@ define(function () {
         return hex.length == 1 ? "0" + hex : hex;
     }
     color.rgbToHexString = function (r, g, b) {
+        if (typeof r === 'object') {
+            b = r.b;
+            g = r.g;
+            r = r.r;
+        }
         return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
     }
     color.rgbToHexInt = function (r, g, b) {
+        if (typeof r === 'object') {
+            b = r.b;
+            g = r.g;
+            r = r.r;
+        }
         let hexString = componentToHex(Math.round(r)) + componentToHex(Math.round(g)) + componentToHex(Math.round(b));
         return parseInt(hexString, 16);
     }
