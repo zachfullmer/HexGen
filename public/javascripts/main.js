@@ -54,11 +54,14 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
         var pixelRatio = devicePixelRatio;
         var zoom = 1.0;
         var canvasSize = { w: window.innerWidth * pixelRatio / zoom, h: window.innerHeight * pixelRatio / zoom };
+        var renderer = PIXI.autoDetectRenderer(canvasSize.w, canvasSize.h);
         function updateCanvasSize() {
+            zoom = Math.max(0.5, Math.min(zoom, 2.0));
+            $('#zoom').text(parseFloat(zoom * 100).toFixed(1) + '%');
             canvasSize = { w: window.innerWidth * pixelRatio / zoom, h: window.innerHeight * pixelRatio / zoom };
             renderer.resize(canvasSize.w, canvasSize.h);
         }
-        var renderer = PIXI.autoDetectRenderer(canvasSize.w, canvasSize.h);
+        updateCanvasSize();
         renderer.view.id = 'mapWindow';
         renderer.view.style.position = "absolute";
         renderer.view.style.display = "block";
