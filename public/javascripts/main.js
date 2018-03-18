@@ -166,8 +166,11 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         let pixelPos = { x: ((event.clientX * pixelRatio / zoom) + hexMap.screenPos.x), y: ((event.clientY * pixelRatio / zoom) + hexMap.screenPos.y) }
                         let axial = hexMap.pixelToAxial(pixelPos.x, pixelPos.y, hexMap.tileHeightInPixels / 2);
                         let offset = MAP.axialToOffset(axial);
-                        let path = hexMap.findPath(testUnit.pos, offset, testUnit);
-                        testUnit.path = path;
+                        // let path = hexMap.findPath(testUnit.pos, offset, testUnit);
+                        // testUnit.path = path;
+                        var site = new SITE.Site(SITE.get('humanCity'));
+                        anims.push(site.anim);
+                        hexMap.addSite(site, offset.x, offset.y);
                     });
                     $(window).on('resize', (event) => {
                         updateCanvasSize();
@@ -183,9 +186,9 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     stage.addChild(hexMap.spriteContainer);
                     let anims = [];
                     //
-                    testUnit = new UNIT.Unit(UNIT.get('army'));
-                    anims.push(testUnit.anim);
-                    hexMap.addUnit(testUnit, 77, 60);
+                    // testUnit = new UNIT.Unit(UNIT.get('army'));
+                    // anims.push(testUnit.anim);
+                    // hexMap.addUnit(testUnit, 77, 60);
                     testSite = new SITE.Site(SITE.get('humanCity'));
                     anims.push(testSite.anim);
                     hexMap.addSite(testSite, 78, 60);
@@ -204,9 +207,7 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         var deltaTime = time - oldTime;
                         oldTime = time;
                         //
-                        let rgb = { r: Math.floor(Math.random() * 256), g: 128, b: 255 };
                         graphics.clear();
-                        UI.drawCursor(graphics, hexMap, COLOR.rgbToHexInt(rgb));
                         //
                         for (let a in anims) {
                             anims[a].update(deltaTime);
