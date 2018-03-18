@@ -40,8 +40,8 @@ function seedIsValid(seed) {
 }
 
 requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
-    'gradient', 'scaling', 'pixi', 'site', 'unit'],
-    function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI, SITE, UNIT) {
+    'gradient', 'scaling', 'pixi', 'site', 'unit', 'color', 'ui'],
+    function ($, MAP, TILE, XML, SPRITES, ANIM, GEN, TINT, GRADIENT, SCALING, PIXI, SITE, UNIT, COLOR, UI) {
         var seed = '12345678';
         $('#mapSeed').val(seed);
         var meter = new FPSMeter();
@@ -191,6 +191,10 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                     hexMap.addSite(testSite, 78, 60);
                     //
                     var oldTime = null;
+                    let tilePos = hexMap.pixelCoordsOfTile(73, 57);
+                    var graphics = new PIXI.Graphics();
+                    graphics.position.set(tilePos.x, tilePos.y);
+                    stage.addChild(graphics);
                     function render(time) {
                         meter.tickStart();
                         requestAnimationFrame(render);
@@ -200,7 +204,10 @@ requirejs(['jquery', 'map', 'tile', 'xml', 'sprites', 'anim', 'gen', 'tint',
                         var deltaTime = time - oldTime;
                         oldTime = time;
                         //
-                        //castleAnim.update(deltaTime, renderer);
+                        let rgb = { r: Math.floor(Math.random() * 256), g: 128, b: 255 };
+                        graphics.clear();
+                        UI.drawCursor(graphics, hexMap, COLOR.rgbToHexInt(rgb));
+                        //
                         for (let a in anims) {
                             anims[a].update(deltaTime);
                         }
