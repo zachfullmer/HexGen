@@ -5,10 +5,8 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
         UNIT.unitTypes = {
             army: {
                 name: 'Army',
-                // animListName: 'monsters',
-                // animName: 'Bowser',
-                spriteListName: 'feature',
-                spritePath: '/plants/pine/l1'
+                animListName: 'monsters',
+                animName: 'Bowser'
             }
         };
         UNIT.loadUnits = function () {
@@ -30,7 +28,6 @@ define(['jquery', 'sprites', 'pixi', 'window', 'anim'],
             this.path = [];
             this.anim = null;
             this.sprite = null;
-            console.log(this);
             SPRITES.createEntityGraphics(this);
             this.canPass = function (tile) {
                 if (!this.type.canPassWater && tile.terrain.water) {
